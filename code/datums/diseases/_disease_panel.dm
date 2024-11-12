@@ -29,10 +29,10 @@
 
 	var/list/diseases = subtypesof(/datum/disease)
 	var/list/symptoms = subtypesof(/datum/symptom)
-	var/list/infectee = list()
 
 	var/list/diseasesData = list()
 	var/list/symptomsData = list()
+	var/list/infectee = list()
 
 	for (var/thing in diseases)
 		var/datum/disease/D = thing
@@ -52,14 +52,17 @@
 			"stealth" = S.stealth,
 			"resistance" = S.resistance,
 			"stageSpeed" = S.stage_speed,
-			"transmittable" = S.transmittable,
-			"severity" = S.severity
+			"transmittable" = S.transmittable
 		))
 
 	for (var/thing in human_mob_list)
 		var/mob/living/carbon/human/H = thing
-		if (H.ckey)
-			infectee += H
+		to_world(H.name)
+		infectee += list(list(
+			"name" = H.name,
+			"ref" = "\ref[H]"
+		))
+
 
 	data["diseases"] = diseasesData
 	data["symptoms"] = symptomsData

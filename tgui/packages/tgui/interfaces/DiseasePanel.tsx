@@ -1,14 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { useBackend } from '../backend';
-import {
-  Button,
-  LabeledList,
-  NoticeBox,
-  Section,
-  Table,
-  Tabs,
-} from '../components';
+import { Section, Stack, Table, Tabs } from '../components';
 import { Window } from '../layouts';
 
 type Disease = {
@@ -21,158 +14,119 @@ type Disease = {
 type Symptom = {
   name: string;
   stealth: string;
-  resistance: string;
-  stageSpeed: string;
-  transmittable: string;
-  severity: string;
+  resistance: number;
+  stageSpeed: number;
+  tramsittable: string;
+};
+
+type Infectee = {
+  name: string;
+  ref: string;
 };
 
 type Data = {
-  infectees: string[];
   diseases: Disease[];
   symptoms: Symptom[];
+  infectees: Infectee[] | null; // Allow null in case of missing data
 };
 
 export const DiseasePanel = () => {
-  const { data, act } = useBackend<Data>();
+  const { data } = useBackend<Data>();
   const { diseases, symptoms, infectees } = data;
 
-  const [selectedTab, setSelectedTab] = useState('preset');
-  const [selectedDisease, setSelectedDisease] = useState<Disease | null>(null);
-  const [selectedSymptoms, setSelectedSymptoms] = useState<Symptom[]>([]);
-  const [selectedInfectees, setSelectedInfectees] = useState<string[]>([]);
+  // Basic error handling if diseases data is missing or empty
+  if (!diseases || diseases.length === 0) {
+    return (
+      <Window width={575} height={510}>
+        <Window.Content>
+          <Stack fill vertical>
+            <Section title="No Diseases Found">
+              <p>No diseases data available.</p>
+            </Section>
+          </Stack>
+        </Window.Content>
+      </Window>
+    );
+  }
 
-  const handleReleaseDisease = () => {
-    act('release_disease', {
-      disease: selectedDisease?.commonName,
-      infectees: selectedInfectees,
-    });
-  };
+  // Track the selected tab (Diseases or Symptoms)
+  const [selectedTab, setSelectedTab] = useState<'diseases' | 'symptoms'>(
+    'diseases',
+  );
 
   return (
-    <Window>
+    <Window width={575} height={510}>
       <Window.Content>
-        <Section title="Disease Panel">
+        <Stack fill vertical>
           <Tabs>
+            {/* Tab for Diseases List */}
             <Tabs.Tab
-              selected={selectedTab === 'preset'}
-              onClick={() => setSelectedTab('preset')}
+              icon="virus"
+              selected={selectedTab === 'diseases'}
+              onClick={() => setSelectedTab('diseases')}
             >
-              Preset Diseases
+              Diseases
             </Tabs.Tab>
+
+            {/* Tab for Symptoms List */}
             <Tabs.Tab
-              selected={selectedTab === 'custom'}
-              onClick={() => setSelectedTab('custom')}
+              icon="heartbeat"
+              selected={selectedTab === 'symptoms'}
+              onClick={() => setSelectedTab('symptoms')}
             >
-              Create New Disease
+              Symptoms
             </Tabs.Tab>
           </Tabs>
 
-          {selectedTab === 'preset' && (
-            <Section title="Select a Disease">
-              <LabeledList>
-                {diseases.map((disease) => (
-                  <LabeledList.Item
-                    key={disease.commonName}
-                    label={disease.commonName}
-                    buttons={
-                      <Button
-                        icon="virus"
-                        onClick={() => setSelectedDisease(disease)}
-                        selected={selectedDisease === disease}
-                      >
-                        Select
-                      </Button>
-                    }
-                  >
-                    {disease.description}
-                  </LabeledList.Item>
-                ))}
-              </LabeledList>
-            </Section>
-          )}
-
-          {selectedTab === 'custom' && (
-            <Section title="Select Symptoms">
+          {/* Conditionally render the selected tab content */}
+          {selectedTab === 'diseases' && (
+            <Section title="Diseases List">
               <Table>
                 <Table.Row header>
-                  <Table.Cell>Symptom</Table.Cell>
-                  <Table.Cell>Stealth</Table.Cell>
-                  <Table.Cell>Resistance</Table.Cell>
-                  <Table.Cell>Stage Speed</Table.Cell>
-                  <Table.Cell>Transmissibility</Table.Cell>
+                  <Table.Cell>Common Name</Table.Cell>
+                  <Table.Cell>Description</Table.Cell>
+                  <Table.Cell>Treatment</Table.Cell>
+                  <Table.Cell>Transmission</Table.Cell>
                 </Table.Row>
-                {symptoms.map((symptom) => (
-                  <Table.Row key={symptom.name}>
-                    <Table.Cell>{symptom.name}</Table.Cell>
-                    <Table.Cell>{symptom.stealth}</Table.Cell>
-                    <Table.Cell>{symptom.resistance}</Table.Cell>
-                    <Table.Cell>{symptom.stageSpeed}</Table.Cell>
-                    <Table.Cell>{symptom.transmittable}</Table.Cell>
-                    <Table.Cell>
-                      <Button
-                        icon="plus"
-                        onClick={() =>
-                          setSelectedSymptoms((prev) =>
-                            prev.includes(symptom)
-                              ? prev.filter((s) => s !== symptom)
-                              : [...prev, symptom],
-                          )
-                        }
-                        selected={selectedSymptoms.includes(symptom)}
-                      >
-                        {selectedSymptoms.includes(symptom) ? 'Remove' : 'Add'}
-                      </Button>
-                    </Table.Cell>
+                {diseases.map((disease, index) => (
+                  <Table.Row key={index}>
+                    <Table.Cell>{disease.commonName}</Table.Cell>
+                    <Table.Cell>{disease.description}</Table.Cell>
+                    <Table.Cell>{disease.treatment}</Table.Cell>
+                    <Table.Cell>{disease.transmission}</Table.Cell>
                   </Table.Row>
                 ))}
               </Table>
             </Section>
           )}
 
-          <Section title="Select Infectees">
-            <LabeledList>
-              {infectees.map((infectee) => (
-                <LabeledList.Item
-                  key={infectee}
-                  label={infectee}
-                  buttons={
-                    <Button
-                      icon="user"
-                      onClick={() =>
-                        setSelectedInfectees((prev) =>
-                          prev.includes(infectee)
-                            ? prev.filter((inf) => inf !== infectee)
-                            : [...prev, infectee],
-                        )
-                      }
-                      selected={selectedInfectees.includes(infectee)}
-                    >
-                      {selectedInfectees.includes(infectee)
-                        ? 'Deselect'
-                        : 'Select'}
-                    </Button>
-                  }
-                />
-              ))}
-            </LabeledList>
+          {selectedTab === 'symptoms' && (
+            <Section title="Symptoms List">
+              <p>Symptoms data will be shown here in the future.</p>
+            </Section>
+          )}
+
+          {/* Displaying all the people from the infectees (Infectee) */}
+          <Section title="Infectee List">
+            <Table>
+              <Table.Row header>
+                <Table.Cell>Name</Table.Cell>
+              </Table.Row>
+              {infectees && infectees.length > 0 ? (
+                infectees.map((infectee, index) => (
+                  <Table.Row key={index}>
+                    <Table.Cell>{infectee.name}</Table.Cell>{' '}
+                    {/* Corrected reference */}
+                  </Table.Row>
+                ))
+              ) : (
+                <Table.Row>
+                  <Table.Cell>No infectees available</Table.Cell>
+                </Table.Row>
+              )}
+            </Table>
           </Section>
-
-          <NoticeBox info>
-            {selectedDisease
-              ? `Selected Disease: ${selectedDisease.commonName}`
-              : 'No disease selected'}
-          </NoticeBox>
-
-          <Button
-            icon="biohazard"
-            onClick={handleReleaseDisease}
-            disabled={!selectedDisease && selectedSymptoms.length === 0}
-            tooltip="Release the selected disease to chosen infectees."
-          >
-            Release Disease
-          </Button>
-        </Section>
+        </Stack>
       </Window.Content>
     </Window>
   );
