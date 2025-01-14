@@ -436,29 +436,23 @@
 ///Called by /client/Move()
 ///For moving in space
 ///Return 1 for movement 0 for none
-/mob/proc/Process_Spacemove(var/check_drift = 0)
+/mob/Process_Spacemove(movement_dir = 0)
+
+	if(..())
+		return 1
 
 	if(is_incorporeal())
-		return
+		return TRUE
 
-	if(!Check_Dense_Object()) //Nothing to push off of so end here
-		update_floating(0)
-		return 0
+	var/atom/movable/backup = get_spacemove_backup(movement_dir)
 
-	update_floating(1)
-
-	if(restrained()) //Check to see if we can do things
-		return 0
-
-	//Check to see if we slipped
-	if(prob(Process_Spaceslipping(5)) && !buckled)
-		to_chat(src, span_boldnotice("You slipped!"))
-		inertia_dir = last_move
-		step(src, src.inertia_dir) // Not using Move for smooth glide here because this is a 'slip' so should be sudden.
-		return 0
-	//If not then we can reset inertia and move
-	inertia_dir = 0
-	return 1
+	if(backup)
+		if(istype(backup) && movement_dir && !backup.anchored)
+			var/opposite_dir = turn(movement_dir, 180)
+			if(backup.newtonian_move(opposite_dir))
+				to_chat(src, span_notice("You push off the [backup] to propel yourself."))
+		return TRUE
+	return FALSE
 
 /mob/proc/Check_Dense_Object() //checks for anything to push off in the vicinity. also handles magboots on gravity-less floors tiles
 

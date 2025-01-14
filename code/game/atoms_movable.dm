@@ -8,11 +8,19 @@
 	var/moving_diagonally
 	var/move_speed = 10
 	var/l_move_time = 1
+
 	var/throwing = 0
 	var/thrower
 	var/turf/throw_source = null
 	var/throw_speed = 2
 	var/throw_range = 7
+
+	var/inertia_dir = 0
+	var/atom/inertia_last_loc
+	var/inertia_moving = 0
+	var/inertia_next_move = 0
+	var/inertia_move_delay = 5
+
 	var/moved_recently = 0
 	var/mob/pulledby = null
 	var/item_state = null // Used to specify the item state for the on-mob overlays.
@@ -83,148 +91,58 @@
 
 ////////////////////////////////////////
 /atom/movable/Move(atom/newloc, direct = 0, movetime)
-	// Didn't pass enough info
-	if(!loc || !newloc)
-		return FALSE
-
-	if(SEND_SIGNAL(src, COMSIG_MOVABLE_PRE_MOVE, newloc, direct, movetime) & COMPONENT_MOVABLE_BLOCK_PRE_MOVE)
-		return FALSE
-
-	// Store this early before we might move, it's used several places
+	if(!loc || !newloc) return 0
 	var/atom/oldloc = loc
 
-	// If we're not moving to the same spot (why? does that even happen?)
 	if(loc != newloc)
-		if(!direct)
-			direct = get_dir(oldloc, newloc)
-		if (IS_CARDINAL(direct)) //Cardinal move
-			// Track our failure if any in this value
-			. = TRUE
-
-			// Face the direction of movement
+		if(movetime > 0)
+			glide_for(movetime)
+		if(IS_DIR_CARDINAL(direct))
+			. = ..(newloc, direct) // don't pass up movetime
 			set_dir(direct)
-
-			// Check to make sure we can leave
-			if(!loc.Exit(src, newloc))
-				. = FALSE
-
-			// Check to make sure we can enter, if we haven't already failed
-			if(. && !newloc.Enter(src, src.loc))
-				. = FALSE
-
-			// Check to make sure if we're multi-tile we can move, if we haven't already failed
-			if(. && !check_multi_tile_move_density_dir(direct, locs))
-				. = FALSE
-
-			// Definitely moving if you enter this, no failures so far
-			if(. && locs.len <= 1)	// We're not a multi-tile object.
-				var/area/oldarea = get_area(oldloc)
-				var/area/newarea = get_area(newloc)
-				var/old_z = get_z(oldloc)
-				var/dest_z = get_z(newloc)
-
-				// Do The Move
-				if(movetime)
-					glide_for(movetime) // First attempt, lets let the diag do it.
-				loc = newloc
-				. = TRUE
-
-				// So objects can be informed of z-level changes
-				if (old_z != dest_z)
-					onTransitZ(old_z, dest_z)
-
-				// We don't call parent so we are calling this for byond
-				oldloc.Exited(src, newloc)
-				if(oldarea != newarea)
-					oldarea.Exited(src, newloc)
-
-				// Multi-tile objects can't reach here, otherwise you'd need to avoid uncrossing yourself
-				for(var/atom/movable/thing as anything in oldloc)
-					// We don't call parent so we are calling this for byond
-					thing.Uncrossed(src)
-
-				// We don't call parent so we are calling this for byond
-				newloc.Entered(src, oldloc)
-				if(oldarea != newarea)
-					newarea.Entered(src, oldloc)
-
-				// Multi-tile objects can't reach here, otherwise you'd need to avoid uncrossing yourself
-				for(var/atom/movable/thing as anything in loc)
-					// We don't call parent so we are calling this for byond
-					thing.Crossed(src, oldloc)
-
-			// We're a multi-tile object (multiple locs)
-			else if(. && newloc)
-				. = doMove(newloc)
-
-		//Diagonal move, split it into cardinal moves
-		else
+		else //Diagonal move, split it into cardinal moves
 			moving_diagonally = FIRST_DIAG_STEP
-			var/first_step_dir
-			// The `&& moving_diagonally` checks are so that a forceMove taking
-			// place due to a Crossed, Bumped, etc. call will interrupt
-			// the second half of the diagonal movement, or the second attempt
-			// at a first half if step() fails because we hit something.
-			glide_for(movetime * 2)
-			if (direct & NORTH)
-				if (direct & EAST)
-					if (step(src, NORTH) && moving_diagonally)
-						first_step_dir = NORTH
-						moving_diagonally = SECOND_DIAG_STEP
-						. = step(src, EAST)
-					else if (moving_diagonally && step(src, EAST))
-						first_step_dir = EAST
-						moving_diagonally = SECOND_DIAG_STEP
-						. = step(src, NORTH)
-				else if (direct & WEST)
-					if (step(src, NORTH) && moving_diagonally)
-						first_step_dir = NORTH
-						moving_diagonally = SECOND_DIAG_STEP
-						. = step(src, WEST)
-					else if (moving_diagonally && step(src, WEST))
-						first_step_dir = WEST
-						moving_diagonally = SECOND_DIAG_STEP
-						. = step(src, NORTH)
-			else if (direct & SOUTH)
-				if (direct & EAST)
-					if (step(src, SOUTH) && moving_diagonally)
-						first_step_dir = SOUTH
-						moving_diagonally = SECOND_DIAG_STEP
-						. = step(src, EAST)
-					else if (moving_diagonally && step(src, EAST))
-						first_step_dir = EAST
-						moving_diagonally = SECOND_DIAG_STEP
-						. = step(src, SOUTH)
-				else if (direct & WEST)
-					if (step(src, SOUTH) && moving_diagonally)
-						first_step_dir = SOUTH
-						moving_diagonally = SECOND_DIAG_STEP
-						. = step(src, WEST)
-					else if (moving_diagonally && step(src, WEST))
-						first_step_dir = WEST
-						moving_diagonally = SECOND_DIAG_STEP
-						. = step(src, SOUTH)
-			// If we failed, turn to face the direction of the first step at least
-			if(!. && moving_diagonally == SECOND_DIAG_STEP)
-				set_dir(first_step_dir)
-			// Done, regardless!
+			var/first_step_dir = 0
+			// For each diagonal direction, we try moving NORTH/SOUTH first, and if it fails, we try moving EAST/WEST first.
+			// As long as either succeeds, we try the other.
+			var/direct_NS = direct & (NORTH | SOUTH)
+			var/direct_EW = direct & (EAST | WEST)
+			var/first_step_target = get_step(src, direct_NS)
+			Move(first_step_target, direct_NS)
+			if(loc == first_step_target)
+				first_step_dir = direct_NS
+				moving_diagonally = SECOND_DIAG_STEP
+				. = Move(get_step(src, direct_EW), direct_EW)
+			else if(loc == oldloc)
+				first_step_target = get_step(src, direct_EW)
+				Move(first_step_target, direct_EW)
+				if(loc == first_step_target)
+					first_step_dir = direct_EW
+					moving_diagonally = SECOND_DIAG_STEP
+					. = Move(get_step(src, direct_NS), direct_NS)
+			if(first_step_dir != 0)
+				if(!.)
+					set_dir(first_step_dir)
+					Moved(oldloc, first_step_dir)
+				else if(!inertia_moving)
+					inertia_next_move = world.time + inertia_move_delay
+					newtonian_move(direct)
 			moving_diagonally = 0
-			// We return because step above will call Move() and we don't want to do shenanigans back in here again
 			return
 
-	else if(!loc || (loc == oldloc))
+	if(!loc || (loc == oldloc && oldloc != newloc))
 		last_move = 0
 		return
 
-	// If we moved, call Moved() on ourselves
 	if(.)
-		Moved(oldloc, direct, FALSE, movetime ? movetime : ( (TICKS2DS(WORLD_ICON_SIZE/glide_size)) * (moving_diagonally ? (0.5) : 1) ) )
+		Moved(oldloc, direct)
 
-	// Update timers/cooldown stuff
+	last_move = direct
 	move_speed = world.time - l_move_time
 	l_move_time = world.time
-	last_move = direct // The direction you last moved
-	// set_dir(direct) //Don't think this is necessary
+
+	if(. && has_buckled_mobs() && !handle_buckled_mob_movement(loc, direct, movetime)) //movement failed due to buckled mob
+		. = FALSE
 
 //Called after a successful Move(). By this point, we've already moved
 /atom/movable/proc/Moved(atom/old_loc, direction, forced = FALSE, movetime)
@@ -264,6 +182,25 @@
 			. = TRUE
 	return .
 
+/atom/movable/proc/get_spacemove_backup()
+	var/atom/movable/dense_object_backup
+	for(var/A in orange(1, get_turf(src)))
+		if(isarea(A))
+			continue
+		else if(isturf(A))
+			var/turf/turf = A
+			if(!turf.density)
+				continue
+			return turf
+		else
+			var/atom/movable/AM = A
+			if(!AM.CanPass(src) || AM.density)
+				if(AM.anchored)
+					return AM
+				dense_object_backup = AM
+				break
+	. = dense_object_backup
+
 /atom/movable/Bump(atom/A)
 	if(!A)
 		CRASH("Bump was called with no argument.")
@@ -285,6 +222,42 @@
 		. = doMove(destination, direction, movetime)
 	else
 		CRASH("No valid destination passed into forceMove")
+
+//Called whenever an object moves and by mobs when they attempt to move themselves through space
+//And when an object or action applies a force on src, see newtonian_move() below
+//return FALSE to have src start/keep drifting in a no-grav area and TRUE to stop/not start drifting
+//Mobs should return TRUE if they should be able to move of their own volition, see client/Move() in mob_movement.dm
+//movement_dir == 0 when stopping or any dir when trying to move
+/atom/movable/proc/Process_Spacemove(movement_dir = 0)
+	if(get_gravity(src))
+		return TRUE
+
+	if(pulledby && !pulledby.pulling)
+		return TRUE
+
+	if(SEND_SIGNAL(src, COMSIG_MOVABLE_SPACEMOVE, movement_dir) & COMSIG_MOVABLE_STOP_SPACEMOVE)
+		return TRUE
+
+	if(throwing)
+		return TRUE
+
+	if(locate(/obj/structure/lattice) in range(1, get_turf(src)))
+		return TRUE
+
+	return FALSE
+
+/atom/movable/proc/newtonian_move(direction) //Only moves the object if it's under no gravity
+	if(!loc || Process_Spacemove(0))
+		inertia_dir = 0
+		return FALSE
+
+	inertia_dir = direction
+	if(!direction)
+		return TRUE
+
+	inertia_last_loc = loc
+	SSspacedrift.processing[src] = src
+	return TRUE
 
 /atom/movable/proc/moveToNullspace()
 	return doMove(null)

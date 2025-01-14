@@ -1270,6 +1270,8 @@
 		clear_alert("weightless")
 	else
 		throw_alert("weightless", /obj/screen/alert/weightless)
+	if(!flying)
+		update_floating(!has_gravity)
 
 // Tries to turn off things that let you see through walls, like mesons.
 // Each mob does vision a bit differently so this is just for inheritence and also so overrided procs can make the vision apply instantly if they call `..()`.

@@ -273,6 +273,10 @@
 ///called when the movable is added to a disposal holder object for disposal movement: (obj/structure/disposalholder/holder, obj/machinery/disposal/source)
 #define COMSIG_MOVABLE_DISPOSING "movable_disposing"
 
+/// from base of atom/movable/Process_Spacemove(): (movement_dir, continuous_move)
+#define COMSIG_MOVABLE_SPACEMOVE "spacemove"
+	#define COMSIG_MOVABLE_STOP_SPACEMOVE (1<<0)
+
 // /mob signals
 
 ///from base of /mob/Login(): ()
