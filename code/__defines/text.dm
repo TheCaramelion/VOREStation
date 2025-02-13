@@ -11,3 +11,7 @@
 
 /// Simply removes the < and > characters, and limits the length of the message.
 #define STRIP_HTML_SIMPLE(text, limit) (GLOB.angular_brackets.Replace(copytext(text, 1, limit), ""))
+
+#define MAPTEXT(text) {"<span class='maptext'>[##text]</span>"}
+
+#define WXH_TO_HEIGHT(measurem) text2num(copytext(x, findtextEx(x, "x") + 1))
