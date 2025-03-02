@@ -92,3 +92,5 @@
 			break; \
 		} \
 	}
+
+#define MINERAL_MATERIAL_AMOUNT 2000

@@ -110,6 +110,9 @@
 /atom/proc/LateInitialize()
 	return
 
+/atom/proc/ComponentInitialize()
+	return
+
 /atom/proc/reveal_blood()
 	return
 
