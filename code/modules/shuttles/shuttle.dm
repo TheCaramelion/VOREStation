@@ -32,6 +32,9 @@
 
 	var/debug_logging = FALSE // If set to true, the shuttle will start broadcasting its debug messages to admins
 
+	var/obj/effect/shuttle_landmark/start_location
+	var/made_warning = FALSE
+
 	// Future Thoughts: Baystation put "docking" stuff in a subtype, leaving base type pure and free of docking stuff. Is this best?
 
 /datum/shuttle/New(_name, var/obj/effect/shuttle_landmark/initial_location)
@@ -116,34 +119,34 @@
 	if(!pre_warmup_checks())
 		return
 
-	var/obj/effect/shuttle_landmark/start_location = current_location
+	start_location = current_location
 	// TODO - Figure out exactly when to play sounds. Before warmup_time delay? Should there be a sleep for waiting for sounds? or no?
 	moving_status = SHUTTLE_WARMUP
-	spawn(warmup_time*10)
 
-		make_sounds(HYPERSPACE_WARMUP)
-		create_warning_effect(destination)
-		sleep(5 SECONDS) // so the sound finishes.
+	addtimer(CALLBACK(src, PROC_REF(send_shuttle)), warmup_time * 10 + 5 SECONDS)
+	addtimer(CALLBACK(src, PROC_REF(create_warning_effect), destination), warmup_time * 10 + 5 SECONDS)
+	addtimer(CALLBACK(src, PROC_REF(make_sounds), HYPERSPACE_WARMUP), warmup_time * 10)
 
-		if(!post_warmup_checks())
-			cancel_launch(null)
+/datum/shuttle/proc/send_shuttle(var/obj/effect/shuttle_landmark/destination)
+	if(!post_warmup_checks())
+		cancel_launch(null)
 
-		if(!fuel_check()) //fuel error (probably out of fuel) occured, so cancel the launch
-			cancel_launch(null)
+	if(!fuel_check()) //fuel error (probably out of fuel) occured, so cancel the launch
+		cancel_launch(null)
 
-		if (moving_status == SHUTTLE_IDLE)
-			make_sounds(HYPERSPACE_END)
-			return	//someone cancelled the launch
-
-		moving_status = SHUTTLE_INTRANSIT //shouldn't matter but just to be safe
-		on_shuttle_departure(start_location, destination)
-
-		attempt_move(destination)
-
-		moving_status = SHUTTLE_IDLE
-		on_shuttle_arrival(start_location, destination)
-
+	if (moving_status == SHUTTLE_IDLE)
 		make_sounds(HYPERSPACE_END)
+		return	//someone cancelled the launch
+
+	moving_status = SHUTTLE_INTRANSIT //shouldn't matter but just to be safe
+	on_shuttle_departure(start_location, destination)
+
+	attempt_move(destination)
+
+	moving_status = SHUTTLE_IDLE
+	on_shuttle_arrival(start_location, destination)
+
+	make_sounds(HYPERSPACE_END)
 
 // TODO - Far Future - Would be great if this was driven by process too.
 /datum/shuttle/proc/long_jump(var/obj/effect/shuttle_landmark/destination, var/obj/effect/shuttle_landmark/interim, var/travel_time)
@@ -154,53 +157,62 @@
 	if(!pre_warmup_checks())
 		return
 
-	var/obj/effect/shuttle_landmark/start_location = current_location
+	start_location = current_location
 	// TODO - Figure out exactly when to play sounds. Before warmup_time delay? Should there be a sleep for waiting for sounds? or no?
 	moving_status = SHUTTLE_WARMUP
-	spawn(warmup_time*10)
 
-		make_sounds(HYPERSPACE_WARMUP)
-		create_warning_effect(interim) // Really doubt someone is gonna get crushed in the interim area but for completeness's sake we'll make the warning.
-		sleep(5 SECONDS) // so the sound finishes.
+	addtimer(CALLBACK(src, PROC_REF(send_long_jump), travel_time, interim), warmup_time * 10 + 5 SECONDS)
+	addtimer(CALLBACK(src, PROC_REF(create_warning_effect), interim), warmup_time * 10 + 5 SECONDS)
+	addtimer(CALLBACK(src, PROC_REF(make_sounds), HYPERSPACE_WARMUP), warmup_time * 10)
 
-		if(!post_warmup_checks())
-			cancel_launch(null)
+/datum/shuttle/proc/send_long_jump(var/travel_time, var/obj/effect/shuttle_landmark/interim, var/destination)
+	if(!post_warmup_checks())
+		cancel_launch(null)
 
-		if (moving_status == SHUTTLE_IDLE)
-			make_sounds(HYPERSPACE_END)
-			return	//someone cancelled the launch
-
-		arrive_time = world.time + travel_time*10
-		depart_time = world.time
-
-		moving_status = SHUTTLE_INTRANSIT
-		on_shuttle_departure(start_location, destination)
-
-		if(attempt_move(interim, TRUE))
-			interim.shuttle_arrived()
-
-			if(process_longjump(current_location, destination)) //VOREStation Edit - To hook custom shuttle code in
-				return //VOREStation Edit - It handled it for us (shuttle crash or such)
-
-			var/last_progress_sound = 0
-			var/made_warning = FALSE
-			while (world.time < arrive_time)
-				// Make the shuttle make sounds every four seconds, since the sound file is five seconds.
-				if(last_progress_sound + 4 SECONDS < world.time)
-					make_sounds(HYPERSPACE_PROGRESS)
-					last_progress_sound = world.time
-
-				if(arrive_time - world.time <= 5 SECONDS && !made_warning)
-					made_warning = TRUE
-					create_warning_effect(destination)
-				sleep(5)
-
-			if(!attempt_move(destination))
-				attempt_move(start_location) //try to go back to where we started. If that fails, I guess we're stuck in the interim location
-
-		moving_status = SHUTTLE_IDLE
-		on_shuttle_arrival(start_location, destination)
+	if (moving_status == SHUTTLE_IDLE)
 		make_sounds(HYPERSPACE_END)
+		return	//someone cancelled the launch
+
+	arrive_time = world.time + travel_time*10
+	depart_time = world.time
+
+	moving_status = SHUTTLE_INTRANSIT
+	on_shuttle_departure(start_location, destination)
+
+	if(attempt_move(interim, TRUE))
+		interim.shuttle_arrived()
+
+		if(process_longjump(current_location, destination)) //VOREStation Edit - To hook custom shuttle code in
+			return //VOREStation Edit - It handled it for us (shuttle crash or such)
+
+		var/last_progress_sound = 0
+		while (world.time < arrive_time)
+			// Make the shuttle make sounds every four seconds, since the sound file is five seconds.
+			if(last_progress_sound + 4 SECONDS < world.time)
+				make_sounds(HYPERSPACE_PROGRESS)
+				last_progress_sound = world.time
+
+			if(arrive_time - world.time <= 5 SECONDS && !made_warning)
+				made_warning = TRUE
+				create_warning_effect(destination)
+			addtimer(CALLBACK(src, PROC_REF(finish_long_jump), destination), 2 SECONDS)
+
+/datum/shuttle/proc/finish_long_jump(var/obj/effect/shuttle_landmark/destination)
+	addtimer(CALLBACK(src, PROC_REF(make_sounds), HYPERSPACE_PROGRESS), 4 SECONDS)
+
+	if(arrive_time - world.time <= 5 SECONDS && !made_warning)
+		made_warning = TRUE
+		create_warning_effect(destination)
+		addtimer(CALLBACK(src, PROC_REF(finish_send), destination))
+	else addtimer(CALLBACK(src, PROC_REF(finish_long_jump)), 2 SECONDS)
+
+/datum/shuttle/proc/finish_send(var/obj/effect/shuttle_landmark/destination)
+	if(!attempt_move(destination))
+		attempt_move(start_location) //try to go back to where we started. If that fails, I guess we're stuck in the interim location
+
+	moving_status = SHUTTLE_IDLE
+	on_shuttle_arrival(start_location, destination)
+	make_sounds(HYPERSPACE_END)
 
 
 //////////////////////////////

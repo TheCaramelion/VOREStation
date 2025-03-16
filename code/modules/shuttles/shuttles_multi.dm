@@ -17,7 +17,6 @@
 	var/arrival_message
 	var/departure_message
 
-	var/start_location
 	var/last_location
 	var/return_warning = 0
 	var/legit = FALSE
