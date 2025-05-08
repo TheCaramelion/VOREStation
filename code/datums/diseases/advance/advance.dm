@@ -39,7 +39,7 @@ GLOBAL_LIST_INIT(advance_cures, list(
 	var/id = ""
 
 /datum/disease/advance/New()
-	Refresh()
+	Refresh(skip_generation = TRUE)
 
 /datum/disease/advance/Destroy()
 	if(s_processing)
@@ -152,17 +152,20 @@ GLOBAL_LIST_INIT(advance_cures, list(
 
 	return generated
 
-/datum/disease/advance/proc/Refresh(new_name = FALSE)
+/datum/disease/advance/proc/Refresh(new_name = FALSE, skip_generation = FALSE)
 	GenerateProperties()
 	AssignProperties()
 	id = null
-
 	var/the_id = GetDiseaseID()
+	to_world("the_id = [the_id]")
 	if(!GLOB.archive_diseases[the_id])
-		GLOB.archive_diseases[the_id] = src // So we don't infinite loop
-		GLOB.archive_diseases[the_id] = CopyDisease()
-		if(new_name)
-			AssignName()
+		GLOB.archive_diseases[the_id] = src
+		/* //I just commented this out because I can't find any reason we'd want to do this.
+		if(!skip_generation) //Prevents infinite recursion.
+			GLOB.archive_diseases[the_id] = CopyDisease()
+		*/
+		if(new_name && !skip_generation)
+			AssignName(new_name)
 	else
 		var/datum/disease/advance/A = GLOB.archive_diseases[GetDiseaseID()]
 		var/actual_name = A.name
@@ -262,7 +265,7 @@ GLOBAL_LIST_INIT(advance_cures, list(
 	var/s = safepick(GenerateSymptoms(min_level, max_level, 1))
 	if(s)
 		AddSymptom(s)
-		Refresh(TRUE)
+		Refresh()
 	return
 
 // Randomly generates a symptom from a given list, has a chance to lose or gain a symptom.
@@ -270,7 +273,7 @@ GLOBAL_LIST_INIT(advance_cures, list(
 	var/s = safepick(D)
 	if(s)
 		AddSymptom(new s)
-		Refresh(TRUE)
+		Refresh()
 	return
 
 // Randomly remove a symptom.
@@ -279,7 +282,7 @@ GLOBAL_LIST_INIT(advance_cures, list(
 		var/s = safepick(symptoms)
 		if(s)
 			RemoveSymptom(s)
-			Refresh(TRUE)
+			Refresh()
 	return
 
 // Randomly neuter a symptom.
@@ -288,15 +291,15 @@ GLOBAL_LIST_INIT(advance_cures, list(
 		var/s = safepick(symptoms)
 		if(s)
 			NeuterSymptom(s)
-			Refresh(TRUE)
+			Refresh()
 
 // Name the disease.
 /datum/disease/advance/proc/AssignName(new_name = "Unknown")
-	Refresh()
+	Refresh(skip_generation = TRUE)
 	var/datum/disease/advance/A = GLOB.archive_diseases[GetDiseaseID()]
 	A.name = new_name
 	for(var/datum/disease/advance/AD in GLOB.active_diseases)
-		AD.Refresh()
+		AD.Refresh(skip_generation = TRUE)
 
 // Return a unique ID of the disease.
 /datum/disease/advance/GetDiseaseID()
@@ -329,7 +332,7 @@ GLOBAL_LIST_INIT(advance_cures, list(
 		RemoveSymptom(pick(symptoms))
 		symptoms += S
 	S.OnAdd(src)
-	Refresh()
+	Refresh(skip_generation = TRUE)
 
 // Simply removes the symptom.
 /datum/disease/advance/proc/RemoveSymptom(datum/symptom/S)
@@ -370,7 +373,7 @@ GLOBAL_LIST_INIT(advance_cures, list(
 
 	// Should be only 1 entry left, but if not let's only return a single entry
 	var/datum/disease/advance/to_return = pick(diseases)
-	to_return.Refresh(new_name = TRUE)
+	to_return.Refresh(skip_generation = TRUE)
 	return to_return
 
 /proc/SetViruses(datum/reagent/R, list/data)
@@ -419,11 +422,11 @@ GLOBAL_LIST_INIT(advance_cures, list(
 		var/new_name = tgui_input_text(src, "Name your new disease.", "New Name")
 		if(!new_name)
 			return FALSE
-		D.Refresh(new_name)
+		D.Refresh(new_name, skip_generation = TRUE)
 		D.Finalize()
 
 		for(var/datum/disease/advance/AD in GLOB.active_diseases)
-			AD.Refresh()
+			AD.Refresh(skip_generation = TRUE)
 
 		H = tgui_input_list(src, "Choose infectee", "Infectees", human_mob_list)
 
