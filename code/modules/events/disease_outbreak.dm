@@ -77,7 +77,7 @@ GLOBAL_LIST_EMPTY(current_pending_diseases)
 
 		A.AssignProperties(A.GenerateProperties())
 	A.name = pick(GLOB.alphabet_upper) + num2text(rand(1,9)) + pick(GLOB.alphabet_upper) + num2text(rand(1,9)) + pick("v", "V", "-" + num2text(GLOB.game_year), "")
-	A.Refresh()
+	A.Refresh(skip_generation = TRUE)
 	return A
 
 /datum/event/disease_outbreak/proc/populate_diseases()

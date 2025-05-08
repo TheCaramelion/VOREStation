@@ -48,18 +48,19 @@
 	name = "experimental disease culture bottle"
 	desc = "A small bottle. Contains an untested viral culture."
 
-/obj/item/reagent_containers/glass/beaker/vial/culture/random_virus/Initialize(mapload)
+/obj/item/reagent_containers/glass/beaker/vial/culture/random_virus/Initialize(mapload, minor_variant = FALSE)
 	. = ..()
-	diseases += new /datum/disease/advance/random
-	data["viruses"] = diseases
-	reagents.add_reagent(REAGENT_ID_BLOOD, 10, data)
+	if(!minor_variant)
+		diseases += new /datum/disease/advance/random
+		data["viruses"] = diseases
+		reagents.add_reagent(REAGENT_ID_BLOOD, 10, data)
 
 /obj/item/reagent_containers/glass/beaker/vial/culture/random_virus/minor
 	name = "minor experimental disease culture bottle"
 	desc = "A small bottle. Contains a weak version of an untested viral culture."
 
 /obj/item/reagent_containers/glass/beaker/vial/culture/random_virus/minor/Initialize(mapload)
-	. = ..()
+	. = ..(minor_variant = TRUE)
 	diseases += new /datum/disease/advance/random/minor
 	data["viruses"] = diseases
 	reagents.add_reagent(REAGENT_ID_BLOOD, 10, data)
