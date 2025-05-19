@@ -241,7 +241,7 @@
 		return
 	if(A.resistance >= 5)
 		absorption_coeff = 0.25
-	if(A.stage_speed >= 7)
+	if(A.stage_rate >= 7)
 		power = 2
 
 /datum/symptom/heal/water/CanHeal(datum/disease/advance/advanced_disease)
@@ -251,15 +251,15 @@
 	if(H.fire_stacks < 0)
 		H.adjust_fire_stacks(min(absorption_coeff, -H.fire_stacks))
 		. += power
-	else if(infected_mob.reagents.has_reagent(REAGENT_ID_WATER))
-		infected_mob.reagents.remove_reagent(REAGENT_ID_WATER, 0.5 * absorption_coeff)
+	else if(H.reagents.has_reagent(REAGENT_ID_WATER))
+		H.reagents.remove_reagent(REAGENT_ID_WATER, 0.5 * absorption_coeff)
 		. += power * 0.5
 
 /datum/symptom/heal/water/Heal(mob/living/carbon/human/H, datum/disease/advance/A, actual_power)
 	var/heal_amt = 2 * actual_power
 
 	if(base_message_chance)
-		to_chat(M, span_notice("You feel yourself absorbing the water around you to soothe your damaged skin."))
+		to_chat(H, span_notice("You feel yourself absorbing the water around you to soothe your damaged skin."))
 
 	H.adjustFireLoss(-heal_amt)
 
