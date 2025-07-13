@@ -56,3 +56,44 @@
 			if(replaceorgans || replacebody)
 				Replace(H)
 	return
+
+/datum/symptom/robotic_adaptation/proc/Replace(var/mob/living/carbon/human/H)
+	if(H.)
+	if(replaceorgans)
+		for(var/obj/item/organ/internal/O in H.internal_organs)
+			if(O.robotic >= ORGAN_ROBOT)
+				continue
+			switch(O)
+				if(/obj/item/organ/internal/brain)
+					var/obj/item/organ/internal/brain/brain = O
+					brain.robotize()
+					return TRUE
+				if(/obj/item/organ/internal/stomach)
+					var/obj/item/organ/internal/stomach/stomach = O
+					stomach.robotize()
+					return TRUE
+				if(/obj/item/organ/internal/eyes)
+					var/obj/item/organ/internal/eyes/eyes = O
+					eyes.robotize()
+					if(prob(40) && H.stat != DEAD)
+						to_chat(H, span_userdanger("You feel a stabbing pain in your eyeballs!"))
+						H.emote("scream")
+					return TRUE
+				if(/obj/item/organ/internal/lungs)
+					var/obj/item/organ/internal/lungs/lungs = O
+					lungs.robotize()
+					if(prob(40) && H.stat != DEAD)
+						to_chat(H, span_userdanger("You feel a stabbing pain in your chest!"))
+						H.emote("scream")
+					return TRUE
+				if(/obj/item/organ/internal/heart)
+					var/obj/item/organ/internal/heart/heart = O
+					heart.robotize()
+					if(prob(40) && H.stat != DEAD)
+						to_chat(H, span_userdanger("You feel a stabbing pain in your chest!"))
+						H.emote("scream")
+					return TRUE
+				if(/obj/item/organ/internal/voicebox)
+					var/obj/item/organ/internal/voicebox/voicebox = O
+					voicebox.robotize()
+					return TRUE
