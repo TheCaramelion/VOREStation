@@ -114,8 +114,8 @@ GLOBAL_LIST_INIT(advance_cures, list(
 /datum/disease/advance/proc/HasSymptom(datum/symptom/S)
 	for(var/datum/symptom/symp in symptoms)
 		if(symp.id == S.id)
-			return 1
-	return 0
+			return TRUE
+	return FALSE
 
 /datum/disease/advance/proc/GenerateSymptomsBySeverity(sev_min, sev_max, amount = 1)
 
@@ -221,8 +221,8 @@ GLOBAL_LIST_INIT(advance_cures, list(
 		visibility_flags &= ~HIDDEN_SCANNER
 
 	SetSpread()
-	permeability_mod = max(CEILING(0.4 * transmission, 1), 1)
-	cure_chance = 15 - clamp(resistance, -5, 5) // can be between 10 and 20
+	spreading_modifier = max(CEILING(0.4 * transmission, 1), 1)
+	cure_chance = clamp(7.5 - (0.5 * resistance), 5, 10) // Can be between 5 and 10
 	stage_prob = max(stage_rate, 2)
 	SetSeverity(severity)
 	GenerateCure()
@@ -347,20 +347,18 @@ GLOBAL_LIST_INIT(advance_cures, list(
 // Add a symptom, if it is over the limit (with a small chance to be able to go over)
 // we take a random symptom away and add the new one.
 /datum/disease/advance/proc/AddSymptom(datum/symptom/S)
-
 	if(HasSymptom(S))
 		return
-
-	if(length(symptoms) < (VIRUS_SYMPTOM_LIMIT - 1) + rand(-1, 1))
-		symptoms += S
-	else
+	if(symptoms.len >= VIRUS_SYMPTOM_LIMIT)
 		RemoveSymptom(pick(symptoms))
-		symptoms += S
+	symptoms += S
+	S.OnAdd(src)
 	Refresh()
 
 // Simply removes the symptom.
 /datum/disease/advance/proc/RemoveSymptom(datum/symptom/S)
 	symptoms -= S
+	S.OnRemove(src)
 	return
 
 // Neuters a symptom, allowing it only for stats.

@@ -221,7 +221,7 @@
 	if(!istype(H))
 		return
 	if(H.getOxyLoss() > 0)
-		H.adjustOxyLoss(3 * power)
+		H.adjustOxyLoss(-10 * power)
 	if(regenerate_blood && H.vessel.get_reagent_amount(REAGENT_ID_BLOOD) < H.species.blood_volume)
 		H.add_chemical_effect(CE_BLOODRESTORE, 1)
 
@@ -261,10 +261,10 @@
 		. += power
 	if(H.ingested.has_reagent(REAGENT_ID_HOLYWATER))
 		H.ingested.remove_reagent(REAGENT_ID_HOLYWATER, 0.5 * absorption_coeff)
-		. += power * 0.75
+		. += power * 1.25
 	else if(H.ingested.has_reagent(REAGENT_ID_WATER))
 		H.ingested.remove_reagent(REAGENT_ID_WATER, 0.5 * absorption_coeff)
-		. += power * 0.5
+		. += power
 
 /datum/symptom/heal/water/Heal(mob/living/carbon/human/H, datum/disease/advance/A, actual_power)
 	if(!istype(H))
@@ -277,7 +277,7 @@
 	if(!zone_list.len)
 		return
 
-	if(prob(5))
+	if(prob(base_message_chance))
 		to_chat(H, span_notice("You feel yourself absorbing the water around you to soothe your damaged skin."))
 
 	var/obj/item/organ/external/pickedpart

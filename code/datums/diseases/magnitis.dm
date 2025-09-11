@@ -7,7 +7,7 @@
 	cures = list(REAGENT_ID_IRON)
 	agent = "Fukkos Miracos"
 	viable_mobtypes = list(/mob/living/carbon/human)
-	permeability_mod = 0.75
+	spreading_modifier = 0.75
 	desc = "This disease disrupts the magnetic field of your body, making it act as if a powerful magnet. Injections of iron help stabilize the field."
 	danger = DISEASE_MINOR
 

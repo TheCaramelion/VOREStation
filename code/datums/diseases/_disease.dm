@@ -32,7 +32,6 @@ GLOBAL_LIST_INIT(diseases, subtypesof(/datum/disease))
 	var/infectivity = 10
 	var/cure_chance = 8
 	var/spreading_modifier = 1
-	var/permeability_mod = 1
 	var/danger = DISEASE_MINOR
 	var/list/required_organs = list()
 	var/list/strain_data = list()
@@ -99,7 +98,7 @@ GLOBAL_LIST_INIT(diseases, subtypesof(/datum/disease))
 
 /datum/disease/proc/has_cure()
 	if(!(disease_flags & CURABLE))
-		return 0
+		return FALSE
 
 	var/cures_found = 0
 	for(var/C_id in cures)

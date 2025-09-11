@@ -63,7 +63,7 @@
 
 /mob/proc/ContractDisease(datum/disease/D, var/target_zone)
 	if(!CanContractDisease(D))
-		return 0
+		return FALSE
 	D.infect(src)
 	return TRUE
 
@@ -82,7 +82,7 @@
 	var/hands_chance = 35/2
 	var/feet_chance = 15/2
 
-	if(prob(15/D.permeability_mod))
+	if(prob(15/D.spreading_modifier))
 		return
 
 	if(nutrition > 300 && prob(nutrition/50))

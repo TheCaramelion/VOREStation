@@ -9,7 +9,7 @@
 	virus_modifiers = NONE //Does NOT have needs_all_cures
 	agent = "XY-rhinovirus"
 	viable_mobtypes = list(/mob/living/carbon/human, /mob/living/carbon/human/monkey)
-	permeability_mod = 0.5
+	spreading_modifier = 0.5
 	desc = "If left untreated the subject will contract the flu."
 	danger = DISEASE_MINOR
 

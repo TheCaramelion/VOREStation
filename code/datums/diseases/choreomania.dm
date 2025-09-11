@@ -9,7 +9,7 @@
 	cure_chance = 10
 	agent = "TAP-DAnC3"
 	viable_mobtypes = list(/mob/living/carbon/human)
-	permeability_mod = 0.75
+	spreading_modifier = 0.75
 	desc = "If left untreated the subject... Won't stop dancing!"
 	danger = DISEASE_MINOR
 
