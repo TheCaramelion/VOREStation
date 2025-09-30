@@ -27,9 +27,9 @@ BONUS
 	symptom_delay_max = 40 SECONDS
 
 	threshold_descs = list(
-		"Resistance 8" = "Spawns a strong blob instead of a normal blob",
-		"Resistance 11" = "There is a chance to spawn a factory blob, instead of a normal blob.",
-		"Resistance 14" = "Has a chance to spawn a blob node instead of a normal blob"
+		"Resistance 6" = "Spawns a strong blob instead of a normal blob",
+		"Resistance 9" = "There is a chance to spawn a factory blob, instead of a normal blob.",
+		"Resistance 12" = "Has a chance to spawn a blob node instead of a normal blob"
 	)
 
 	var/ready_to_pop
@@ -42,18 +42,18 @@ BONUS
 
 /datum/symptom/blobspores/severityset(datum/disease/advance/A)
 	. = ..()
-	if(A.resistance >= 14)
+	if(A.resistance >= 12)
 		severity += 1
 
 /datum/symptom/blobspores/Start(datum/disease/advance/A)
 	if(!..())
 		return
 
-	if(A.resistance >= 11)
+	if(A.resistance >= 9)
 		factory_blob = TRUE
-	if(A.resistance >= 8)
+	if(A.resistance >= 6)
 		strong_blob = TRUE
-		if(A.resistance >= 14)
+		if(A.resistance >= 12)
 			node_blob = TRUE
 
 /datum/symptom/blobspores/Activate(datum/disease/advance/A)

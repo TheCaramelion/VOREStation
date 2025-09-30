@@ -325,7 +325,7 @@ var/const/CE_STABLE_THRESHOLD = 0.5
 		var/datum/disease/D = ID
 		if(D.spread_flags & (DISEASE_SPREAD_SPECIAL | DISEASE_SPREAD_NON_CONTAGIOUS)) // You can't put non-contagius diseases in blood, but just in case
 			continue
-		ContractDisease(D)
+		ForceContractDisease(D)
 	if (injected.data["resistances"] && prob(5))
 		antibodies |= injected.data["resistances"]
 	if (injected.data[REAGENT_ID_ANTIBODIES] && prob(5))

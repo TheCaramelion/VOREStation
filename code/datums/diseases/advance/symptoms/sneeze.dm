@@ -32,7 +32,7 @@ Bonus
 
 	threshold_descs = list(
 		"Stealth 4" = "The symptom remains hidden until active.",
-		"Trasmission 12" = "The host may spread the disease through sneezing."
+		"Trasmission 9" = "The host may spread the disease through sneezing."
 	)
 
 	prefixes = list("Nasal ")
@@ -43,7 +43,7 @@ Bonus
 		return
 	if(A.stealth >= 4)
 		supress_warning = TRUE
-	if(A.transmission >= 12)
+	if(A.transmission >= 9)
 		infective = TRUE
 
 /datum/symptom/sneeze/Activate(datum/disease/advance/A)
@@ -84,8 +84,8 @@ Bonus
 	resistance = 3
 	stage_speed = 0
 	transmission = 1
-	symptom_delay_min = 20 SECONDS
-	symptom_delay_max = 30 SECONDS
+	symptom_delay_min = 15 SECONDS
+	symptom_delay_max = 25 SECONDS
 	level = 4
 	severity = 3
 

@@ -96,8 +96,8 @@
 	var/datum/mind/ownermind
 
 	threshold_descs = list(
-		"Stage Speed 6" = "The disease heals brute damage at a fast rate, but causes expulsion of benign tumors.",
-		"Stage Speed 12" = "The disease heals brute damage incredibly fast, but deteriorates cell health and causes tumors to become more advanced. The disease will also regenerate lost limbs."
+		"Stage Speed 5" = "The disease heals brute damage at a fast rate, but causes expulsion of benign tumors.",
+		"Stage Speed 9" = "The disease heals brute damage incredibly fast, but deteriorates cell health and causes tumors to become more advanced. The disease will also regenerate lost limbs."
 	)
 
 	prefixes = list("Blood ", "Meat ", "Flesh ")
@@ -106,9 +106,9 @@
 /datum/symptom/growth/Start(datum/disease/advance/A)
 	if(!..())
 		return
-	if(A.stage_rate >= 6)
+	if(A.stage_rate >= 5)
 		bruteheal = TRUE
-		if(A.stage_rate >= 12)
+		if(A.stage_rate >= 9)
 			tetsuo = TRUE
 			power = 3
 
@@ -146,7 +146,7 @@
 									H.grab_ghost()
 								break
 			if(bruteheal)
-				H.heal_overall_damage(2 * power)
+				H.heal_overall_damage(3 * power)
 				if(prob(33) && tetsuo)
 					H.adjustCloneLoss(1)
 		else
@@ -167,7 +167,7 @@
 
 	threshold_descs = list(
 		"Stealth 3" = "Reduces hunger rate.",
-		"Stage Speed 10" = "Chemical metabolization is tripled instead of doubled."
+		"Stage Speed 7" = "Chemical metabolization is tripled instead of doubled."
 	)
 
 	prefixes = list("Metabolic ", "Junkie's ", "Chemical ")
@@ -176,7 +176,7 @@
 /datum/symptom/heal/metabolism/Start(datum/disease/advance/A)
 	if(!..())
 		return
-	if(A.stage_rate >= 10)
+	if(A.stage_rate >= 7)
 		triple_metabolism = TRUE
 	if(A.stealth >= 3)
 		reduced_hunger = TRUE
@@ -197,10 +197,10 @@
 /datum/symptom/heal/oxygen
 	name = "Oxygenation"
 	desc = "The virus causes the host's body to produce oxygen, allowing self-respiration."
-	stealth = 1
-	resistance = -3
-	stage_speed = -3
-	transmission = -4
+	stealth = 2
+	resistance = -2
+	stage_speed = -1
+	transmission = -2
 	level = 8
 	base_message_chance = 5
 	symptom_delay_min = 5 SECONDS
@@ -231,7 +231,7 @@
 	stealth = 0
 	resistance = -1
 	stage_speed = 0
-	transmission = 1
+	transmission = 2
 	level = 6
 	passive_message = span_notice("Your skin feels oddly dry...")
 	threshold_descs = list(

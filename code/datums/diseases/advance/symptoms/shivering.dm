@@ -24,8 +24,8 @@ Bonus
 	transmission = 2
 	level = 2
 	severity = 0
-	symptom_delay_min = 20 SECONDS
-	symptom_delay_max = 40 SECONDS
+	symptom_delay_min = 15 SECONDS
+	symptom_delay_max = 30 SECONDS
 
 	var/unsafe = FALSE
 
