@@ -1,4 +1,9 @@
 /mob/Destroy()//This makes sure that mobs withGLOB.clients/keys are not just deleted from the game.
+	if(client)
+		stack_trace("Mob with client has been deleted.")
+
+	persistent_client?.set_mob(null)
+
 	SSmobs.currentrun -= src
 	GLOB.mob_list -= src
 	GLOB.dead_mob_list -= src
@@ -7,7 +12,7 @@
 	unset_machine()
 	clear_fullscreen()
 	if(client)
-		for(var/obj/screen/movable/spell_master/spell_master in spell_masters)
+		for(var/atom/movable/screen/movable/spell_master/spell_master in spell_masters)
 			qdel(spell_master)
 		remove_screen_obj_references()
 		client.screen = list()
@@ -27,7 +32,7 @@
 	if(ability_master)
 		QDEL_NULL(ability_master)
 
-	if(vore_organs)
+	if(LAZYLEN(vore_organs))
 		QDEL_NULL_LIST(vore_organs)
 	if(vorePanel)
 		QDEL_NULL(vorePanel)
@@ -79,6 +84,7 @@
 	set_focus(src) // VOREStation Add - Key Handling
 	update_transform() // Some mobs may start bigger or smaller than normal.
 	. = ..()
+	log_mob_tag("TAG: [tag] CREATED: [key_name(src)] \[[type]\]")
 	//return QDEL_HINT_HARDDEL_NOW Just keep track of mob references. They delete SO much faster now.
 
 /mob/show_message(msg, type, alt, alt_type)
@@ -238,19 +244,73 @@
 /mob/proc/restrained()
 	return
 
-/mob/proc/reset_view(atom/A)
-	if (client)
-		if (istype(A, /atom/movable))
-			client.perspective = EYE_PERSPECTIVE
-			client.eye = A
-		else
-			if (isturf(loc))
-				client.eye = client.mob
-				client.perspective = MOB_PERSPECTIVE
-			else
+/**
+ * Reset the attached clients perspective (viewpoint)
+ *
+ * reset_perspective() set eye to common default : mob on turf, loc otherwise. If the client mob is inside an object with REMOTEVIEW_ON_ENTER, it will restart that object's remote view.
+ * reset_perspective(thing) set the eye to the thing (if it's equal to current default reset to mob perspective). This ignores REMOTEVIEW_ON_ENTER, and forces focus to the mob.
+ */
+/mob/proc/reset_perspective(atom/new_eye)
+	SHOULD_CALL_PARENT(TRUE)
+	if(!client)
+		return
+	if(!isnull(new_eye) && QDELETED(new_eye))
+		new_eye = src // Something has gone terribly wrong
+
+	if(new_eye)
+		if(ismovable(new_eye))
+			//Set the new eye unless it's us
+			if(new_eye != src)
 				client.perspective = EYE_PERSPECTIVE
-				client.eye = loc
+				client.set_eye(new_eye)
+			else
+				client.set_eye(client.mob)
+				client.perspective = MOB_PERSPECTIVE
+
+		else if(isturf(new_eye))
+			//Set to the turf unless it's our current turf
+			if(new_eye != loc)
+				client.perspective = EYE_PERSPECTIVE
+				client.set_eye(new_eye)
+			else
+				client.set_eye(client.mob)
+				client.perspective = MOB_PERSPECTIVE
+		else
+			return TRUE //no setting eye to stupid things like areas or whatever
+	else
+		//If we return focus to our own mob, but we are still inside something with an inherent remote view. Restart it.
+		if(restore_remote_views())
+			return TRUE
+		//Reset to common defaults: mob if on turf, otherwise current loc
+		if(isturf(loc))
+			client.set_eye(client.mob)
+			client.perspective = MOB_PERSPECTIVE
+		else
+			client.perspective = EYE_PERSPECTIVE
+			client.set_eye(loc)
+	/// Signal sent after the eye has been successfully updated, with the client existing.
+	SEND_SIGNAL(src, COMSIG_MOB_RESET_PERSPECTIVE)
+	return TRUE
+
+/// Reapplies remote views based on object type and flags. Returns true if the view was assigned.
+/mob/proc/restore_remote_views()
+	if(!loc) // Nullspace during respawn
+		return FALSE
+	if(isturf(loc)) // Cannot be remote if it was a turf, also obj and turf flags overlap so stepping into space triggers remoteview endlessly.
+		return FALSE
+	if(QDELETED(loc))
+		return FALSE
+	// Check if we actually need to drop our current remote view component, as this is expensive to do, and leads to more difficult to understand error prone logic
+	var/datum/component/remote_view/remote_comp = GetComponent(/datum/component/remote_view)
+	if(remote_comp?.looking_at_target_already(loc))
+		return FALSE
+	if(isitem(loc) || isbelly(loc)) // Requires more careful handling than structures because they are held by mobs
+		AddComponent(/datum/component/remote_view/mob_holding_item, loc)
 		return TRUE
+	if(loc.flags & REMOTEVIEW_ON_ENTER) // Handle atoms that begin a remote view upon entering them.
+		AddComponent(/datum/component/remote_view, loc)
+		return TRUE
+	return FALSE
 
 /mob/proc/ret_grab(list/L, flag)
 	return
@@ -503,17 +563,17 @@
 	var/mob/mob_eye = targets[eye_name]
 
 	if(client && mob_eye)
-		client.eye = mob_eye
-		if (is_admin)
-			client.adminobs = 1
-			if(mob_eye == client.mob || client.eye == client.mob)
-				client.adminobs = 0
+		AddComponent(/datum/component/remote_view, focused_on = mob_eye)
+		if(is_admin)
+			client.adminobs = TRUE
+			if(mob_eye == client.mob || !is_remote_viewing())
+				client.adminobs = FALSE
 
 /mob/verb/cancel_camera()
 	set name = "Cancel Camera View"
 	set category = "OOC.Game"
 	unset_machine()
-	reset_view(null)
+	reset_perspective()
 
 /mob/Topic(href, href_list)
 	if(href_list["mach_close"])
@@ -539,9 +599,13 @@
 		update_flavor_text()
 	return ..()
 
-
+///Proc that checks to see if we DO damage via pulling or not.
 /mob/proc/pull_damage()
-	return 0
+	return FALSE
+
+///Proc that says if it's POSSIBLE to be damaged via pulling or not.
+/mob/proc/pull_can_damage()
+	return FALSE
 
 /mob/verb/stop_pulling()
 
@@ -642,8 +706,8 @@
 				to_chat(H, span_warning("\The [src] grips your arm."))
 		playsound(loc, 'sound/weapons/thudswoosh.ogg', 25) //Quieter than hugging/grabbing but we still want some audio feedback
 
-		if(H.pull_damage())
-			to_chat(src, span_filter_notice("[span_red(span_bold("Pulling \the [H] in their current condition would probably be a bad idea."))]"))
+		if(H.pull_can_damage())
+			to_chat(src, span_danger(span_large("Pulling \the [H] in their current condition could easily worsen their injuries.")))
 
 	//Attempted fix for people flying away through space when cuffed and dragged.
 	if(ismob(AM))
@@ -939,7 +1003,7 @@
 	else
 		to_chat(U, span_warning("You attempt to get a good grip on [selection] in [S]'s body."))
 
-	if(!do_after(U, 30))
+	if(!do_after(U, 3 SECONDS, target = src))
 		return
 	if(!selection || !S || !U)
 		return
@@ -1183,7 +1247,7 @@
 
 
 /client/proc/check_has_body_select()
-	return mob && mob.hud_used && istype(mob.zone_sel, /obj/screen/zone_sel)
+	return mob && mob.hud_used && istype(mob.zone_sel, /atom/movable/screen/zone_sel)
 
 /client/verb/body_toggle_head()
 	set name = "body-toggle-head"
@@ -1223,7 +1287,7 @@
 /client/proc/toggle_zone_sel(list/zones)
 	if(!check_has_body_select())
 		return
-	var/obj/screen/zone_sel/selector = mob.zone_sel
+	var/atom/movable/screen/zone_sel/selector = mob.zone_sel
 	selector.set_selected_zone(next_in_list(mob.zone_sel.selecting,zones))
 
 // This handles setting the client's color variable, which makes everything look a specific color.

@@ -216,7 +216,7 @@
 	var/has_fine_manipulation = 1							// Can use small items.
 	var/siemens_coefficient = 1								// The lower, the thicker the skin and better the insulation.
 	var/darksight = 2										// Native darksight distance.
-	var/flags = 0											// Various specific features.
+	var/flags = NONE											// Various specific features.
 	var/appearance_flags = 0								// Appearance/display related features.
 	var/spawn_flags = 0										// Flags that specify who can spawn as this species
 
@@ -490,7 +490,7 @@
 		var/organ_type = has_organ[organ_tag]
 		var/obj/item/organ/O = new organ_type(H,1)
 		if(organ_tag != O.organ_tag)
-			warning("[O.type] has a default organ tag \"[O.organ_tag]\" that differs from the species' organ tag \"[organ_tag]\". Updating organ_tag to match.")
+			WARNING("[O.type] has a default organ tag \"[O.organ_tag]\" that differs from the species' organ tag \"[organ_tag]\". Updating organ_tag to match.")
 			O.organ_tag = organ_tag
 		H.internal_organs_by_name[organ_tag] = O
 
@@ -704,18 +704,51 @@
 		H.adjustToxLoss(amount)
 
 /datum/species/proc/handle_falling(mob/living/carbon/human/H, atom/hit_atom, damage_min, damage_max, silent, planetary)
-	if(soft_landing)
-		if(planetary || !istype(H))
-			return FALSE
+	var/turf/landing = get_turf(hit_atom)
+	if(!istype(landing))
+		return FALSE
+	if(planetary || !istype(H))
+		return FALSE
+	//commented out, as this turf doesn't exist upstream
+	/*if(istype(landing, /turf/simulated/floor/boxing))
+		if(!silent)
+			to_chat(H, span_notice("\The [landing] cushions your fall."))
+			landing.visible_message(span_infoplain(span_bold("\The [H]") + " 's fall is cushioned by \The [landing]."))
+			playsound(H, "rustle", 25, 1)
+		if(!soft_landing)
+			H.Weaken(10)
+		return TRUE*/
+	//end edit
+	if(istype(landing, /turf/simulated/floor/water))
+		var/turf/simulated/floor/water/W = landing
+		if(W.depth)
+			if(!silent)
+				to_chat(H, span_notice("You splash down into \the [landing]."))
+				landing.visible_message(span_infoplain(span_bold("\The [H]") + " splashes down into \The [landing]."))
+				playsound(H, "'sound/effects/slosh.ogg'", 25, 5)
+			return TRUE
 
-		var/turf/landing = get_turf(hit_atom)
-		if(!istype(landing))
-			return FALSE
+	if(soft_landing)
 
 		if(!silent)
 			to_chat(H, span_notice("You manage to lower impact of the fall and land safely."))
 			landing.visible_message(span_infoplain(span_bold("\The [H]") + " lowers down from above, landing safely."))
 			playsound(H, "rustle", 25, 1)
+		return TRUE
+
+	if(HAS_TRAIT(src, TRAIT_HEAVY_LANDING))
+
+		if(!silent)
+			to_chat(H, span_danger("You land with a heavy crash!"))
+			landing.visible_message(span_danger(span_bold("\The [H]") + " crashes down from above!"))
+			playsound(H, 'sound/effects/meteorimpact.ogg', 75, TRUE, 3)
+			for(var/i = 1 to 10)
+				H.adjustBruteLoss(rand((0), (10)))
+			H.Weaken(20)
+			H.updatehealth()
+			if(istype(landing, /turf/simulated/floor) && prob(50))
+				var/turf/simulated/floor/our_crash = landing
+				our_crash.break_tile()
 		return TRUE
 
 	return FALSE

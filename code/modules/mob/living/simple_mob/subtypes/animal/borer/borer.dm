@@ -171,7 +171,6 @@
 
 	forceMove(get_turf(host))
 
-	reset_view(null)
 	machine = null
 
 	if(ishuman(host))
@@ -180,7 +179,6 @@
 		if(head)
 			head.implants -= src
 
-	host.reset_view(null)
 	host.machine = null
 	host = null
 
@@ -215,6 +213,12 @@
 
 /mob/living/simple_mob/animal/borer/cannot_use_vents()
 	return
+
+/mob/living/simple_mob/animal/borer/UnarmedAttack(var/atom/A, var/proximity)
+	if(ismob(loc))
+		to_chat(src, span_warning("You cannot interact with that from inside a host!"))
+		return
+	. = ..()
 
 // This is awful but its literally say code.
 /mob/living/simple_mob/animal/borer/say(var/message, var/datum/language/speaking = null, var/whispering = 0)

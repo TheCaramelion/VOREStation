@@ -25,6 +25,7 @@ type Data = {
   SM_gas_N2: number;
   SM_gas_PH: number;
   SM_gas_N2O: number;
+  SM_gas_CH4: number;
   supermatters: { area_name: string; integrity: number; uid: number }[];
 };
 
@@ -103,6 +104,7 @@ const SupermatterMonitorActive = (props) => {
     SM_gas_N2,
     SM_gas_PH,
     SM_gas_N2O,
+    SM_gas_CH4,
   } = data;
 
   return (
@@ -178,20 +180,23 @@ const SupermatterMonitorActive = (props) => {
         </LabeledList.Item>
         <LabeledList.Item label="Gas Composition">
           <LabeledList>
-            <LabeledList.Item label="O²">
+            <LabeledList.Item label="O₂">
               <AnimatedNumber value={SM_gas_O2} />%
             </LabeledList.Item>
-            <LabeledList.Item label="CO²">
+            <LabeledList.Item label="CO₂">
               <AnimatedNumber value={SM_gas_CO2} />%
             </LabeledList.Item>
-            <LabeledList.Item label="N²">
+            <LabeledList.Item label="N₂">
               <AnimatedNumber value={SM_gas_N2} />%
             </LabeledList.Item>
             <LabeledList.Item label="PH">
               <AnimatedNumber value={SM_gas_PH} />%
             </LabeledList.Item>
-            <LabeledList.Item label="N²O">
+            <LabeledList.Item label="N₂O">
               <AnimatedNumber value={SM_gas_N2O} />%
+            </LabeledList.Item>
+            <LabeledList.Item label="CH₄">
+              <AnimatedNumber value={SM_gas_CH4} />%
             </LabeledList.Item>
           </LabeledList>
         </LabeledList.Item>

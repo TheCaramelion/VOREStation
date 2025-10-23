@@ -3203,7 +3203,7 @@
 /turf/simulated/floor/tiled/white,
 /area/tether/surfacebase/medical/patient_c)
 "afc" = (
-/obj/structure/closet/secure_closet/CMO,
+/obj/structure/closet/secure_closet/chief_medical_officer,
 /obj/item/storage/belt/medical,
 /obj/item/flashlight/pen,
 /obj/item/clothing/accessory/stethoscope,
@@ -4651,12 +4651,12 @@
 	dir = 4
 	},
 /obj/structure/table/rack/shelf/steel,
-/obj/item/clothing/mask/gas{
+/obj/item/clothing/mask/gas/clear{
 	pixel_x = 3;
 	pixel_y = 3
 	},
-/obj/item/clothing/mask/gas,
-/obj/item/clothing/mask/gas{
+/obj/item/clothing/mask/gas/clear,
+/obj/item/clothing/mask/gas/clear{
 	pixel_x = -3;
 	pixel_y = -3
 	},
@@ -9371,9 +9371,8 @@
 /obj/structure/cable/green{
 	icon_state = "0-2"
 	},
-/obj/machinery/power/smes/buildable{
-	RCon_tag = "Substation - Security";
-	output_attempt = 0
+/obj/machinery/power/smes/buildable/disable_output{
+	RCon_tag = "Substation - Security"
 	},
 /turf/simulated/floor,
 /area/maintenance/substation/medsec)
@@ -15248,9 +15247,9 @@
 	dir = 8;
 	layer = 2.9
 	},
-/obj/item/clothing/mask/gas,
-/obj/item/clothing/mask/gas,
-/obj/item/clothing/mask/gas,
+/obj/item/clothing/mask/gas/clear,
+/obj/item/clothing/mask/gas/clear,
+/obj/item/clothing/mask/gas/clear,
 /obj/item/gps/command,
 /obj/item/gps/command,
 /obj/item/gps/command,
@@ -16923,9 +16922,8 @@
 	icon_state = "0-2"
 	},
 /obj/structure/cable,
-/obj/machinery/power/smes/buildable{
-	RCon_tag = "Substation - Command";
-	output_attempt = 0
+/obj/machinery/power/smes/buildable/disable_output{
+	RCon_tag = "Substation - Command"
 	},
 /turf/simulated/floor/plating,
 /area/maintenance/substation/command)
@@ -17316,14 +17314,14 @@
 /turf/simulated/floor/tiled/techfloor,
 /area/maintenance/lower/bar)
 "aEu" = (
-/obj/item/clothing/mask/gas,
+/obj/item/clothing/mask/gas/clear,
 /obj/random/mre,
 /obj/random/mre,
 /obj/random/mre,
 /obj/random/mre,
 /obj/random/mre,
-/obj/item/clothing/mask/gas,
-/obj/item/clothing/mask/gas,
+/obj/item/clothing/mask/gas/clear,
+/obj/item/clothing/mask/gas/clear,
 /obj/item/clothing/mask/gas,
 /obj/item/clothing/mask/gas,
 /obj/structure/closet/walllocker_double{
@@ -19565,7 +19563,7 @@
 /turf/simulated/floor/plating,
 /area/rnd/rdoffice)
 "aJk" = (
-/obj/structure/closet/secure_closet/RD,
+/obj/structure/closet/secure_closet/research_director,
 /obj/item/aicard,
 /obj/item/clothing/glasses/omnihud/rnd,
 /obj/effect/floor_decal/borderfloor{
@@ -20406,9 +20404,8 @@
 /turf/simulated/floor/tiled,
 /area/rnd/rdoffice)
 "aKU" = (
-/obj/machinery/power/smes/buildable{
-	RCon_tag = "Substation - Research";
-	output_attempt = 0
+/obj/machinery/power/smes/buildable/disable_output{
+	RCon_tag = "Substation - Research"
 	},
 /obj/structure/cable/green,
 /obj/structure/cable/green{
@@ -23008,7 +23005,7 @@
 	},
 /obj/item/clothing/suit/fire/firefighter,
 /obj/item/tank/oxygen,
-/obj/item/clothing/mask/gas,
+/obj/item/clothing/mask/gas/clear,
 /obj/item/extinguisher,
 /obj/item/clothing/head/hardhat/red,
 /obj/item/clothing/glasses/meson,
@@ -33453,12 +33450,7 @@
 /turf/simulated/floor/tiled/techfloor,
 /area/ai_cyborg_station)
 "rRj" = (
-/obj/machinery/power/smes/buildable{
-	charge = 5e+006;
-	input_attempt = 1;
-	input_level = 200000;
-	output_level = 200000
-	},
+/obj/machinery/power/smes/buildable/engine_default,
 /obj/structure/window/reinforced{
 	dir = 1
 	},
