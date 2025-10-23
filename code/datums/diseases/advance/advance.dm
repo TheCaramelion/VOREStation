@@ -20,7 +20,7 @@ GLOBAL_LIST_INIT(advance_cures, list(
 	name = DEVELOPER_WARNING_NAME
 	desc = "An engineered disease which can contain a multitude of symptoms."
 	form = "Advance Disease"
-	agent = "advance microbes"
+	agent = DISEASE_AGENT_MICROBE
 	max_stages = 5
 	disease_flags = CURABLE|CAN_CARRY|CAN_RESIST|CAN_NOT_POPULATE
 	spread_text = "Unknown"
