@@ -1,11 +1,9 @@
-/* eslint react/no-danger: "off" */
 import { type RefObject, useEffect, useRef, useState } from 'react';
 import { useBackend } from 'tgui/backend';
 import { Window } from 'tgui/layouts';
 import {
   Box,
   Button,
-  Divider,
   Input,
   LabeledList,
   Section,
@@ -63,6 +61,21 @@ export const Ticket = (props) => {
 
   const messagesEndRef: RefObject<HTMLDivElement | null> = useRef(null);
 
+  const {
+    id,
+    name,
+    ticket_ref,
+    state,
+    level,
+    handler,
+    opened_at,
+    closed_at,
+    opened_at_date,
+    closed_at_date,
+    actions,
+    log,
+  } = data;
+
   useEffect(() => {
     const scroll = messagesEndRef.current;
     if (scroll) {
@@ -80,42 +93,45 @@ export const Ticket = (props) => {
         scroll.scrollTop = scroll.scrollHeight;
       }
     }
-  });
+  }, [log]);
 
-  const {
-    id,
-    name,
-    ticket_ref,
-    state,
-    level,
-    handler,
-    opened_at,
-    closed_at,
-    opened_at_date,
-    closed_at_date,
-    actions,
-    log,
-  } = data;
   return (
     <Window width={900} height={600}>
       <Window.Content>
         <Stack fill vertical>
           <Stack.Item>
             <Section
-              title={'Ticket #' + id}
+              title={`Ticket #${id}`}
               buttons={
-                <Box nowrap>
-                  <Button icon="pen" onClick={() => act('retitle')}>
-                    Rename Ticket
-                  </Button>
-                  <Button onClick={() => act('legacy')}>Legacy UI</Button>
-                  <Button color={LevelColor[level]}>{Level[level]}</Button>
-                </Box>
+                <Stack>
+                  <Stack.Item>
+                    <Button icon="pen" onClick={() => act('retitle')}>
+                      Rename Ticket
+                    </Button>
+                  </Stack.Item>
+                  <Stack.Item>
+                    <Button onClick={() => act('legacy')}>Legacy UI</Button>
+                  </Stack.Item>
+                  <Stack.Item>
+                    <Box
+                      className="TicketPanel__Label"
+                      backgroundColor={LevelColor[level]}
+                    >
+                      {Level[level]}
+                    </Box>
+                  </Stack.Item>
+                </Stack>
               }
             >
               <LabeledList>
                 <LabeledList.Item label="Ticket ID">
-                  #{id}: <div dangerouslySetInnerHTML={{ __html: name }} />
+                  <Stack>
+                    <Stack.Item>#{id}:</Stack.Item>
+                    <Stack.Item>
+                      {/** biome-ignore lint/security/noDangerouslySetInnerHtml: Ticket data */}
+                      <div dangerouslySetInnerHTML={{ __html: name }} />
+                    </Stack.Item>
+                  </Stack>
                 </LabeledList.Item>
                 <LabeledList.Item label="Type">{Level[level]}</LabeledList.Item>
                 <LabeledList.Item label="State">
@@ -131,23 +147,29 @@ export const Ticket = (props) => {
                   </LabeledList.Item>
                 ) : (
                   <LabeledList.Item label="Closed At">
-                    {closed_at_date +
-                      ' (' +
-                      toFixed(round((closed_at / 600) * 10, 0) / 10, 1) +
-                      ' minutes ago.)'}
-                    <Button onClick={() => act('reopen')}>Reopen</Button>
+                    <Stack>
+                      <Stack.Item>
+                        {closed_at_date +
+                          ' (' +
+                          toFixed(round((closed_at / 600) * 10, 0) / 10, 1) +
+                          ' minutes ago.)'}
+                      </Stack.Item>
+                      <Stack.Item>
+                        <Button onClick={() => act('reopen')}>Reopen</Button>
+                      </Stack.Item>
+                    </Stack>
                   </LabeledList.Item>
                 )}
                 <LabeledList.Item label="Actions">
+                  {/** biome-ignore lint/security/noDangerouslySetInnerHtml: Ticket data */}
                   <div dangerouslySetInnerHTML={{ __html: actions }} />
                 </LabeledList.Item>
-                <LabeledList.Item label="Log" />
               </LabeledList>
             </Section>
-            <Divider />
+            <Stack.Divider />
           </Stack.Item>
           <Stack.Item grow>
-            <Section scrollable ref={messagesEndRef} fill>
+            <Section scrollable ref={messagesEndRef} fill title="Log">
               <Stack fill direction="column">
                 <Stack.Item grow>
                   {Object.keys(log)
@@ -155,6 +177,7 @@ export const Ticket = (props) => {
                     .map((L, i) => (
                       <div
                         key={i}
+                        // biome-ignore lint/security/noDangerouslySetInnerHtml: Ticket data
                         dangerouslySetInnerHTML={{ __html: log[L] }}
                       />
                     ))}

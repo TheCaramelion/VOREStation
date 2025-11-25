@@ -16,10 +16,10 @@
 
 /obj/item/tvcamera/Initialize(mapload)
 	. = ..()
-	listening_objects += src
+	GLOB.listening_objects += src
 
 /obj/item/tvcamera/Destroy()
-	listening_objects -= src
+	GLOB.listening_objects -= src
 	qdel(camera)
 	qdel(radio)
 	camera = null
@@ -69,7 +69,6 @@
 		return 1
 	if(href_list["channel"])
 		var/nc = tgui_input_text(usr, "Channel name", "Select new channel name", channel, MAX_NAME_LEN)
-		nc = sanitize(nc,MAX_NAME_LEN)
 		if(nc)
 			channel = nc
 			camera.c_tag = channel
@@ -124,7 +123,7 @@
 	if(camera.status && !isturf(target))
 		show_tvs(target)
 		user.visible_message(span_infoplain(span_bold("[user]") + " aims [src] at [target]."), span_info("You aim [src] at [target]."))
-		if(user.machine == src)
+		if(user.check_current_machine(src))
 			show_ui(user) // refresh the UI
 
 /obj/item/tvcamera/process()

@@ -91,7 +91,7 @@
 	throwforce_absorb_threshold = 10
 	genders = list(MALE, FEMALE, PLURAL, NEUTER)
 
-	min_age = 18
+	min_age = 32
 	max_age = 260
 
 	economic_modifier = 10
@@ -490,7 +490,7 @@
 
 	reagent_tag = IS_ZADDAT
 
-	species_component = /datum/component/burninlight // Until a parent component like xenochimera have is needed, only handles burning in light.
+	species_component = list(/datum/component/burninlight) // Until a parent component like xenochimera have is needed, only handles burning in light.
 
 	heat_discomfort_strings = list(
 		"Your joints itch.",
@@ -563,6 +563,8 @@
 	assisted_langs = list(LANGUAGE_VOX)	// Diona are weird, let's just assume they can use basically any language.
 	min_age = 18
 	max_age = 300
+
+	species_component = list(/datum/component/radiation_effects/diona)
 
 	economic_modifier = 10
 
@@ -881,8 +883,8 @@
 /datum/species/hi_zoxxen
 	name = SPECIES_ZORREN_HIGH
 	name_plural = "Zorren"
-	icobase = 'icons/mob/human_races/r_fox_vr.dmi'
-	deform = 'icons/mob/human_races/r_def_fox.dmi'
+	icobase = 'icons/mob/human_races/r_fox_light_vr.dmi'
+	deform = 'icons/mob/human_races/r_fox.dmi'
 	tail = "tail"
 	icobase_tail = 1
 	unarmed_types = list(/datum/unarmed_attack/stomp, /datum/unarmed_attack/kick, /datum/unarmed_attack/claws, /datum/unarmed_attack/bite/sharp)
@@ -894,8 +896,10 @@
 		/mob/living/proc/shred_limb,
 		/mob/living/carbon/human/proc/tie_hair)
 
-	min_age = 18
+	min_age = 20
 	max_age = 80
+
+	species_sounds = "Vulpine"
 
 	blurb = "The fennec-like, blue-blooded Zorren are native to Virgo 4/Menhir and are descendants of a precursor species \
 			that is thought to be responsible for the near-collapse of the biosphere of the planet. \
@@ -917,6 +921,9 @@
 	blood_reagents = REAGENT_ID_COPPER
 	reagent_tag = IS_ZORREN
 	color_mult = 1
+	default_custom_base = SPECIES_ZORREN_HIGH
+
+	selects_bodytype = SELECTS_BODYTYPE_ZORREN
 
 	genders = list(MALE, FEMALE, PLURAL, NEUTER)
 
@@ -925,6 +932,15 @@
 		"You feel uncomfortably warm.",
 		"Your overheated skin itches."
 		)
+
+/datum/species/hi_zoxxen/get_race_key()
+	var/datum/species/real = GLOB.all_species[base_species]
+	return real.race_key
+
+/datum/species/hi_zoxxen/dark    //alternate sprite base for zorren
+	name = SPECIES_ZORREN_DARK
+	icobase = 'icons/mob/human_races/r_fox_vr.dmi'
+	spawn_flags = SPECIES_IS_RESTRICTED
 
 /datum/species/vulpkanin
 	name = SPECIES_VULPKANIN
@@ -947,6 +963,11 @@
 	color_mult = 1
 	inherent_verbs = list(/mob/living/carbon/human/proc/lick_wounds,
 		/mob/living/carbon/human/proc/tie_hair)
+
+	pain_verb_1p = list("yelp", "growl")
+	pain_verb_3p = list("yelps", "growls")
+
+	species_sounds = "Canine"
 
 	wikilink="https://wiki.vore-station.net/Backstory#Vulpkanin"
 
@@ -997,7 +1018,7 @@
 	icobase = 'icons/mob/human_races/r_skrell_vr.dmi'
 	deform = 'icons/mob/human_races/r_def_skrell_vr.dmi'
 	color_mult = 1
-	min_age = 18
+	min_age = 20
 	inherent_verbs = list(/mob/living/carbon/human/proc/tie_hair, /mob/living/carbon/human/proc/water_stealth, /mob/living/carbon/human/proc/underwater_devour)
 	reagent_tag = null
 	allergens = null
@@ -1114,7 +1135,7 @@
 	burn_mod =  1.35
 	mob_size = MOB_MEDIUM
 	pass_flags = PASSTABLE
-	holder_type = /obj/item/holder/human
+	holder_type = /obj/item/holder/micro
 //	short_sighted = 1
 	has_vibration_sense = TRUE
 	blood_volume = 400
@@ -1391,6 +1412,8 @@
 	min_age = 18
 	max_age = 80
 
+	species_sounds = "Vulpine"
+
 	//primitive_form = "" //We don't have fennec-monkey sprites.
 	spawn_flags = SPECIES_IS_RESTRICTED
 	appearance_flags = HAS_HAIR_COLOR | HAS_LIPS | HAS_UNDERWEAR | HAS_SKIN_COLOR | HAS_EYE_COLOR
@@ -1449,7 +1472,7 @@
 	name = SPECIES_ALTEVIAN
 	name_plural = "Altevians"
 	icobase = 'icons/mob/human_races/r_altevian.dmi'
-	deform = 'icons/mob/human_races/r_def_altevian.dmi'
+	deform = 'icons/mob/human_races/r_altevian.dmi'
 	unarmed_types = list(/datum/unarmed_attack/stomp, /datum/unarmed_attack/kick, /datum/unarmed_attack/claws, /datum/unarmed_attack/bite/sharp)
 	num_alternate_languages = 3
 	secondary_langs = list(LANGUAGE_TAVAN)
@@ -1460,6 +1483,8 @@
 
 	min_age = 18
 	max_age = 80
+
+	species_sounds = "Mouse"
 
 	blurb = "The Altevian are a species of tall, rodent humanoids that are akin to rats for their features. \
 	The Altevian, unlike most species, do not have a home planet, nor system, adopting a fully nomadic lifestyle \
@@ -1525,7 +1550,7 @@
 	tail = "tail" //Spider tail.
 	icobase_tail = 1
 
-	species_component = /datum/component/weaver
+	species_component = list(/datum/component/weaver)
 
 	inherent_verbs = list(
 	/mob/living/carbon/human/proc/tie_hair)
@@ -1584,7 +1609,7 @@
 	name = SPECIES_WEREBEAST
 	name_plural = "Werebeasts"
 	icobase = 'icons/mob/human_races/r_werebeast.dmi'
-	deform = 'icons/mob/human_races/r_def_werebeast.dmi'
+	deform = 'icons/mob/human_races/r_werebeast.dmi'
 	icon_template = 'icons/mob/human_races/r_werebeast.dmi'
 	tail = "tail"
 	unarmed_types = list(/datum/unarmed_attack/stomp, /datum/unarmed_attack/kick, /datum/unarmed_attack/claws, /datum/unarmed_attack/bite/sharp)
@@ -1718,7 +1743,7 @@
 
 	reagent_tag = IS_CHIMERA
 
-	species_component = /datum/component/xenochimera
+	species_component = list(/datum/component/xenochimera)
 
 /datum/species/xenochimera/handle_environment_special(var/mob/living/carbon/human/H)
 	//Cold/pressure effects when not regenerating

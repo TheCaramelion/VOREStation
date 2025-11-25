@@ -333,7 +333,7 @@
 
 /obj/item/spellbook/oneuse/mindswap/recoil(mob/user as mob)
 	..()
-	if(stored_swap in dead_mob_list)
+	if(stored_swap in GLOB.dead_mob_list)
 		stored_swap = null
 	if(!stored_swap)
 		stored_swap = user
@@ -382,7 +382,7 @@
 /obj/item/spellbook/oneuse/forcewall/recoil(mob/user as mob)
 	..()
 	to_chat(user, span_warning("You suddenly feel very solid!"))
-	var/obj/structure/closet/statue/S = new /obj/structure/closet/statue(user.loc, user)
+	var/obj/structure/closet/statue/S = new /obj/structure/closet/statue(get_turf(user), user)
 	S.timer = 30
 	user.drop_item()
 

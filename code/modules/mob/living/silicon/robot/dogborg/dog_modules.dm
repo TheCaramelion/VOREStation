@@ -249,7 +249,7 @@
 				return
 			to_chat(user, span_filter_notice("It has [uses] lights remaining. Attempting to fabricate a replacement. Please stand still."))
 			cooldown = 1
-			if(do_after(user, 50))
+			if(do_after(user, 5 SECONDS, target = src))
 				glass.use_charge(125)
 				add_uses(1)
 				cooldown = 0
@@ -282,7 +282,7 @@
 				return
 			busy = TRUE
 			to_chat(user, span_notice("You begin to attach \the [C] to \the [A]..."))
-			if(do_after(user, 30))
+			if(do_after(user, 3 SECONDS, target = src))
 				to_chat(user, span_notice("You have attached \the [src] to \the [A]."))
 				var/obj/machinery/clamp/clamp = new/obj/machinery/clamp(A.loc, A)
 				clamps.Add(clamp)
@@ -292,7 +292,7 @@
 		else
 			busy = TRUE
 			to_chat(user, span_notice("You begin to remove \the [C] from \the [A]..."))
-			if(do_after(user, 30))
+			if(do_after(user, 3 SECONDS, target = src))
 				to_chat(user, span_notice("You have removed \the [src] from \the [A]."))
 				clamps.Remove(C)
 				qdel(C)
@@ -345,9 +345,10 @@
 
 	if(get_dist(get_turf(T), get_turf(src)) > leap_distance) return
 
-	if(ishuman(T))
-		var/mob/living/carbon/human/H = T
-		if(H.get_species() == SPECIES_SHADEKIN && (H.ability_flags & AB_PHASE_SHIFTED))
+	if(isliving(T))
+		var/mob/living/M = T
+		var/datum/component/shadekin/SK = M.get_shadekin_component()
+		if(SK && SK.in_phase)
 			power_cost *= 2
 
 	if(!use_direct_power(power_cost, minimum_power - power_cost))
@@ -390,8 +391,7 @@
 			return
 
 	var/armor_block = run_armor_check(T, "melee")
-	var/armor_soak = get_armor_soak(T, "melee")
-	T.apply_damage(20, HALLOSS,, armor_block, armor_soak)
+	T.apply_damage(20, HALLOSS, null, armor_block)
 	if(prob(75)) //75% chance to stun for 5 seconds, really only going to be 4 bcus click cooldown+animation.
 		T.apply_effect(5, WEAKEN, armor_block)
 

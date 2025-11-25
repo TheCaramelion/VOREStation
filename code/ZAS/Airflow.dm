@@ -73,7 +73,7 @@ Contains helper procs for airflow, handled in /connection_group.
 	return 1
 
 /mob/AirflowCanMove(n)
-	if(status_flags & GODMODE)
+	if(SEND_SIGNAL(src, COMSIG_CHECK_FOR_GODMODE) & COMSIG_GODMODE_CANCEL)
 		return 0
 	if(buckled)
 		return 0
@@ -126,16 +126,13 @@ Contains helper procs for airflow, handled in /connection_group.
 	var/b_loss = airflow_speed * vsc.airflow_damage
 
 	var/blocked = run_armor_check(BP_HEAD,"melee")
-	var/soaked = get_armor_soak(BP_HEAD,"melee")
-	apply_damage(b_loss/3, BRUTE, BP_HEAD, blocked, soaked, 0)
+	apply_damage(b_loss/3, BRUTE, BP_HEAD, blocked, 0)
 
 	blocked = run_armor_check(BP_TORSO,"melee")
-	soaked = get_armor_soak(BP_TORSO,"melee")
-	apply_damage(b_loss/3, BRUTE, BP_TORSO, blocked, soaked, 0)
+	apply_damage(b_loss/3, BRUTE, BP_TORSO, blocked, 0)
 
 	blocked = run_armor_check(BP_GROIN,"melee")
-	soaked = get_armor_soak(BP_GROIN,"melee")
-	apply_damage(b_loss/3, BRUTE, BP_GROIN, blocked, soaked, 0)
+	apply_damage(b_loss/3, BRUTE, BP_GROIN, blocked, 0)
 
 	if(airflow_speed > 10)
 		Paralyse(round(airflow_speed * vsc.airflow_stun))

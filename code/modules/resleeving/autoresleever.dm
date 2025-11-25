@@ -1,3 +1,5 @@
+GLOBAL_LIST_EMPTY(active_autoresleevers)
+
 /obj/machinery/transhuman/autoresleever
 	name = "automatic resleever"
 	desc = "Uses advanced technology to detect when someone needs to be resleeved, and automatically prints and sleeves them into a new body. It even generates its own biomass!"
@@ -13,9 +15,17 @@
 	var/spawn_slots = -1				//How many people can be spawned from this? If -1 it's unlimited
 	var/spawntype						//The kind of mob that will be spawned, if set.
 
+/obj/machinery/transhuman/autoresleever/Initialize(mapload)
+	. = ..()
+	GLOB.active_autoresleevers += src
+
+/obj/machinery/transhuman/autoresleever/Destroy()
+	. = ..()
+	GLOB.active_autoresleevers -= src
+
 /obj/machinery/transhuman/autoresleever/update_icon()
 	. = ..()
-	if(stat)
+	if(stat & (BROKEN | MAINT | EMPED))
 		icon_state = "autoresleever-o"
 	else
 		icon_state = "autoresleever"
@@ -58,7 +68,7 @@
 		return
 
 /obj/machinery/transhuman/autoresleever/proc/autoresleeve(var/mob/observer/dead/ghost)
-	if(stat)
+	if(stat & (BROKEN | MAINT | EMPED)) // Let it still work when power is just off, it has it's own backup reserve or something.
 		to_chat(ghost, span_warning("This machine is not functioning..."))
 		return
 	if(!isobserver(ghost))
@@ -164,6 +174,7 @@
 	new_character.key = player_key
 
 	//Were they any particular special role? If so, copy.
+
 	if(new_character.mind)
 		new_character.mind.loaded_from_ckey = picked_ckey
 		new_character.mind.loaded_from_slot = picked_slot
@@ -171,6 +182,8 @@
 		if(antag_data)
 			antag_data.add_antagonist(new_character.mind)
 			antag_data.place_mob(new_character)
+		if(new_character.mind.antag_holder)
+			new_character.mind.antag_holder.apply_antags(new_character)
 
 	for(var/lang in ghost_client.prefs.alternate_languages)
 		var/datum/language/chosen_language = GLOB.all_languages[lang]
@@ -188,6 +201,7 @@
 			new_character.default_language = def_lang
 
 	SEND_SIGNAL(new_character, COMSIG_HUMAN_DNA_FINALIZED)
+	SEND_GLOBAL_SIGNAL(COMSIG_GLOB_RESLEEVED_MIND, new_character, new_character.mind)
 
 	//If desired, apply equipment.
 	if(equip_body)
