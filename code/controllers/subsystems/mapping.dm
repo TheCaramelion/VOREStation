@@ -18,6 +18,9 @@ SUBSYSTEM_DEF(mapping)
 	var/obj/effect/landmark/engine_loader/engine_loader
 	var/list/shelter_templates = list()
 
+	///All possible biomes in assoc list as type || instance
+	var/list/biomes = list()
+
 	// TODO: Implement Later
 	var/datum/map/current_map
 
@@ -36,6 +39,7 @@ SUBSYSTEM_DEF(mapping)
 	// Mining generation probably should be here too
 	// TODO - Other stuff related to maps and areas could be moved here too.  Look at /tg
 	// Lateload Code related to Expedition areas.
+	initialize_biomes()
 	if(using_map) // VOREStation Edit: Re-enable this.
 		current_map = using_map
 		loadLateMaps()
@@ -237,3 +241,8 @@ SUBSYSTEM_DEF(mapping)
 	_bapidmm_clear_map_data()
 	fdel("data/baked_dmm_files/")
 // VOREStation Edit End
+
+/datum/controller/subsystem/mapping/proc/initialize_biomes()
+	for(var/biome_path in subtypesof(/datum/biome))
+		var/datum/biome/biome_instance = new biome_path()
+		biomes[biome_path] += biome_instance

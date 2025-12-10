@@ -1083,3 +1083,57 @@ GLOBAL_LIST_EMPTY(json_cache)
 	for(var/i in 1 to count)
 		retval += to_flatten[i]
 	return retval
+
+/// Takes a weighted list (see above) and expands it into raw entries
+/// This eats more memory, but saves time when actually picking from it
+/proc/expand_weights(list/list_to_pick)
+	var/list/values = list()
+	for(var/item in list_to_pick)
+		var/value = list_to_pick[item]
+		if(!value)
+			continue
+		value += value
+
+	var/gcf = greatest_common_factor(values)
+
+	var/list/output = list()
+	for(var/item in list_to_pick)
+		var/value = list_to_pick[item]
+		if(!value)
+			continue
+		for(var/i in 1 to value / gcf)
+			UNTYPED_LIST_ADD(output, item)
+	return output
+
+/// Takes a list of numbers as input, returns the highest value that is cleanly divides them all
+/// Note: this implementation is expensive as heck for large numbers, I only use it because most of my usecase
+/// Is < 10 ints
+/proc/greatest_common_factor(list/values)
+	var/smallest = min(arglist(values))
+	for(var/i in smallest to 1 step -1)
+		var/safe = TRUE
+		for(var/entry in values)
+			if(entry % i != 0)
+				safe = FALSE
+				break
+		if(safe)
+			return i
+
+/**
+ * Given a list, return a copy where values without defined weights are given weight 1.
+ * For example, fill_with_ones(list(A, B=2, C)) = list(A=1, B=2, C=1)
+ * Useful for weighted random choices (loot tables, syllables in languages, etc.)
+ */
+/proc/fill_with_ones(list/list_to_pad)
+	if (!islist(list_to_pad))
+		return list_to_pad
+
+	var/list/final_list = list()
+
+	for (var/key in list_to_pad)
+		if (list_to_pad[key])
+			final_list[key] = list_to_pad[key]
+		else
+			final_list[key] = 1
+
+	return final_list
