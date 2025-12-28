@@ -196,3 +196,8 @@
 
 /// The timer key used to know how long subsystem initialization takes
 #define SS_INIT_TIMER_KEY "ss_init"
+
+// Weather susbsytem tasks
+#define SSWEATHER_MOBS 1
+#define SSWEATHER_TURFS 2
+#define SSWEATHER_THUNDER 3

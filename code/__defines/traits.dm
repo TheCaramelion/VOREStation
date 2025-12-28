@@ -217,3 +217,5 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define SLIP_REFLEX_TRAIT "slip_reflex"
 #define ORGANICS	1
 #define SYNTHETICS	2
+
+#define TRAIT_WEATHER_IMMUNE "weather_immune"

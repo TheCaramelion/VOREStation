@@ -83,8 +83,13 @@
 	/// List of all overlays to apply to our turfs
 	var/list/overlay_cache
 
+	/// The stage of the weather, from 1-4
+	var/stage = END_STAGE
+
 	/// Weight amongst other eligible weather. If zero, will never happen randomly.
 	var/probability = 0
+	/// The z-level trait to affect when run randomly or when not overridden.
+	var/target_trait = ZTRAIT_STATION
 	/// For barometers to know when the next storm will hit
 	var/next_hit_time = 0
 	/// The chance, per tick, a turf will have weather effects applied to it. This is a decimal value, 1.00 = 100%, 0.50 = 50%, etc.
@@ -114,7 +119,7 @@
 	/// The list of allowed tasks our weather subsystem is allowed to process (determined by weather_flags)
 	VAR_FINAL/list/subsystem_tasks = list()
 
-	/// The temperature of our weather that is applied to weather reagents and mobs using adjust_bodytemperature()
+	// The temperature to set planetary walls to.
 	var/weather_temperature = T20C
 
 	/// A list (supports regular, nested, and weighted) of possible reagents that will rain down from the sky.
@@ -150,9 +155,8 @@
 		weather_reagent = find_reagent_object_from_type(reagent_id)
 		weather_color = weather_reagent.color
 		weather_reagent_holder = new(null) // spawns in nullspace
-		weather_reagent_holder.create_reagents(WEATHER_REAGENT_VOLUME, NO_REACT)
+		weather_reagent_holder.create_reagents(WEATHER_REAGENT_VOLUME)
 		weather_reagent_holder.reagents.add_reagent(reagent_id, WEATHER_REAGENT_VOLUME)
-		weather_reagent_holder.reagents.set_temperature(weather_temperature)
 
 	if(weather_flags & (WEATHER_MOBS))
 		subsystem_tasks += SSWEATHER_MOBS
@@ -201,7 +205,7 @@
 		return
 
 	// add in dead mobs so we can get observers covered too
-	for(var/mob/living/affected as anything in GLOB.mob_living_list | GLOB.dead_mob_list)
+	for(var/mob/living/affected as anything in GLOB.mob_list | GLOB.dead_mob_list)
 		if(isnull(affected.client))
 			// this registers 400+ odd signals... maybe we should reconsider
 			RegisterSignal(affected, COMSIG_MOB_LOGIN, PROC_REF(handle_mob_log_in))
@@ -215,7 +219,6 @@
 /datum/weather/proc/get_playlist_ref()
 	return null
 
-/*
 /// Returns a list of z-levels impacted that do not have the target trait
 /datum/weather/proc/get_impacted_zs_without_trait()
 	var/list/zs_without_trait = list()
@@ -223,7 +226,6 @@
 		if(!SSmapping.level_trait(z, target_trait))
 			zs_without_trait += z
 	return zs_without_trait
-*/
 
 /datum/weather/proc/handle_new_mob_sound_manager(datum/source, mob/the_mob)
 	SIGNAL_HANDLER
@@ -368,7 +370,7 @@
 		SEND_SIGNAL(impacted_area, COMSIG_WEATHER_ENDED_IN_AREA(type), src)
 
 	if(target_trait)
-		for(var/mob/living/affected as anything in GLOB.mob_living_list | GLOB.dead_mob_list)
+		for(var/mob/living/affected as anything in GLOB.living_mob_list | GLOB.dead_mob_list)
 			UnregisterSignal(affected, COMSIG_MOB_LOGIN)
 
 // handles sending all alerts
@@ -380,8 +382,7 @@
 			if(alert_msg)
 				to_chat(player, alert_msg)
 			if(alert_sfx)
-				player.stop_sound_channel(CHANNEL_WEATHER)
-				SEND_SOUND(player, sound(alert_sfx, channel = CHANNEL_WEATHER, volume = alert_sfx_vol))
+				playsound(player, alert_sfx, channel = VOLUME_CHANNEL_WEATHER, vol = alert_sfx_vol)
 
 // the checks for if a mob should receive alerts, returns TRUE if can
 /datum/weather/proc/can_get_alert(mob/player)
@@ -437,11 +438,10 @@
  * Returns TRUE if the turf can be affected by the weather
  */
 /datum/weather/proc/can_weather_act_turf(turf/valid_weather_turf)
-	// applying weather effects to solid walls is a waste since nothing will happen
-	if(isclosedturf(valid_weather_turf))
-		return
 	// same logic for space and openspace turfs
-	if(is_space_or_openspace(valid_weather_turf))
+	if(isspace(valid_weather_turf))
+		return
+	if(isopenspace(valid_weather_turf))
 		return
 	// solid windows are also worth skipping
 	var/obj/structure/window/window = locate() in valid_weather_turf
@@ -466,34 +466,34 @@
 		temperature_delta = (temperature_delta > 0) ? min(temperature_delta, BODYTEMP_HEATING_MAX) : max(temperature_delta, BODYTEMP_COOLING_MAX)
 		living.adjust_bodytemperature(temperature_delta)
 
-	if(!weather_reagent || !weather_reagent_holder || living.IsObscured())
+	if(!weather_reagent || !weather_reagent_holder)
 		return
 
 	if(istype(weather_reagent, /datum/reagent/water))
 		living.wash()
 
-	weather_reagent_holder.reagents.expose(living, TOUCH)
+	weather_reagent_holder.reagents.touch_mob(living)
 
 /**
  * Affects the turf with whatever the weather does
  */
-/datum/weather/proc/weather_act_turf(turf/open/weather_turf)
+/datum/weather/proc/weather_act_turf(turf/simulated/weather_turf)
 	if(!weather_reagent || !weather_reagent_holder)
 		return
 
-	weather_reagent_holder.reagents.expose(weather_turf, TOUCH, TURF_REAGENT_VOLUME_MULTIPLIER)
+	weather_reagent_holder.reagents.touch_turf(weather_turf, WEATHER_REAGENT_VOLUME)
 	for(var/atom/thing as anything in weather_turf)
-		if(thing.IsObscured() || isliving(thing))
+		if(isliving(thing))
 			continue
 
-		weather_reagent_holder.reagents.expose(thing, TOUCH, TURF_REAGENT_VOLUME_MULTIPLIER)
+		weather_reagent_holder.reagents.touch(thing, WEATHER_REAGENT_VOLUME)
 
 		// Time for the sophisticated art of catching sky-booze
 		if(!is_reagent_container(thing))
 			continue
 
 		var/obj/item/reagent_containers/container = thing
-		if(!container.is_open_container() || container.reagents.holder_full())
+		if(!container.is_open_container() || container.reagents.total_volume >= container.reagents.maximum_volume)
 			continue
 
 		container.reagents.add_reagent(weather_reagent.type, WEATHER_REAGENT_VOLUME, TURF_REAGENT_VOLUME_MULTIPLIER)
@@ -504,7 +504,7 @@
 /**
  * Affects the turf with thunder
  */
-/datum/weather/proc/thunder_act_turf(turf/open/weather_turf)
+/datum/weather/proc/thunder_act_turf(turf/simulated/weather_turf)
 	var/obj/effect/temp_visual/thunderbolt/thunder = new(weather_turf)
 	thunder.flash_lighting_fx(6, 2, duration = thunder.duration)
 
@@ -513,7 +513,7 @@
 
 	for(var/mob/living/hit_mob in weather_turf)
 		to_chat(hit_mob, span_userdanger("You've been struck by lightning!"))
-		hit_mob.electrocute_act(50, "thunder", flags = SHOCK_TESLA|SHOCK_NOGLOVES)
+		hit_mob.electrocute_act(50, "thunder")
 
 	for(var/obj/item/stack/ore/hit_ore in weather_turf)
 		if(QDELETED(hit_ore))
@@ -522,7 +522,7 @@
 		// a bolt of lightning can reach temperatures of 30,000 Kelvin which is 5x hotter than the sun
 		hit_ore.fire_act(30000)
 
-	playsound(weather_turf, 'sound/effects/magic/lightningbolt.ogg', 100, extrarange = 10, falloff_distance = 10)
+	playsound(weather_turf, 'sound/effects/magic/lightningbolt.ogg', 100, extrarange = 10)
 	weather_turf.visible_message(span_danger("A thunderbolt strikes [weather_turf]!"))
 	new /obj/effect/hotspot(weather_turf)
 
@@ -573,11 +573,11 @@
 		// I prefer it to creating 2 extra plane masters however, so it's a cost I'm willing to pay
 		// LU
 		if(use_glow)
-			var/mutable_appearance/glow_overlay = mutable_appearance('icons/effects/glow_weather.dmi', weather_state, overlay_layer, null, WEATHER_GLOW_PLANE, 100, offset_const = offset)
+			var/mutable_appearance/glow_overlay = mutable_appearance('icons/effects/glow_weather.dmi', weather_state, overlay_layer, null, WEATHER_GLOW_PLANE, 100)
 			glow_overlay.color = weather_color
 			gen_overlay_cache += glow_overlay
 
-		var/mutable_appearance/new_weather_overlay = mutable_appearance('icons/effects/weather_effects.dmi', weather_state, overlay_layer, plane = overlay_plane, offset_const = offset)
+		var/mutable_appearance/new_weather_overlay = mutable_appearance('icons/effects/weather_effects.dmi', weather_state, overlay_layer, plane = overlay_plane)
 		new_weather_overlay.color = weather_color
 		gen_overlay_cache += new_weather_overlay
 
