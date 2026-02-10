@@ -71,6 +71,7 @@
 /datum/robot_sprite/dogborg/raptor/command
 	module_type = "Command"
 	sprite_icon = 'icons/mob/robot/raptor.dmi'
+	hat_offsets = list(RAPTOR_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/raptor/command/raptor
 	name = "Raptor"
@@ -80,6 +81,7 @@
 	rest_sprite_options = list("Default", "Bellyup")
 	icon_y = 64
 	vis_height = 64
+	hat_offsets = list(RAPTOR_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/tall/command/meka
 	name = "MEKA"
@@ -117,6 +119,7 @@
 	has_vore_belly_sprites = TRUE
 	has_dead_sprite_overlay = FALSE
 	rest_sprite_options = list("Default", "Sit", "Bellyup")
+	hat_offsets = list(SMOL_RAPTOR_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/tall/command/dullataurcommand
 	name = "Dullataur"
@@ -132,3 +135,4 @@
 	sprite_decals = list("breastplate", "maidoutfit")
 	icon_x = 64
 	pixel_x = -16
+	hat_offsets = list(DULLAHAN_TAUR_HAT_OFFSET)

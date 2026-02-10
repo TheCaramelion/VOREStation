@@ -41,6 +41,10 @@
 	var/notransform
 	does_spin = FALSE
 
+	var/mutable_appearance/hat_overlay
+	var/obj/item/clothing/head/hat // THE hat!
+	var/hat_offset = list("north" = list(0, -3), "south" = list(0, -3), "east" = list(4, -3), "west" = list(-4, -3))
+
 //Hud stuff
 
 	var/atom/movable/screen/inv1 = null
@@ -350,6 +354,8 @@
 		QDEL_NULL(camera)
 	if(rbPDA)
 		QDEL_NULL(rbPDA)
+	if(hat_overlay)
+		QDEL_NULL(hat_overlay)
 	if(inv1)
 		QDEL_NULL(inv1)
 	if(inv2)
@@ -394,6 +400,7 @@
 				return
 			sprite_datum = module_sprites[1]
 			sprite_datum.do_equipment_glamour(module)
+			update_worn_icons()
 			return
 	if(mind)
 		sprite_name = mind.name
@@ -927,6 +934,12 @@
 					H.do_attack_animation(src)
 					playsound(src.loc, 'sound/effects/clang2.ogg', 10, 1)
 					visible_message(span_warning("[H] taps [src]."))
+					if(hat && prob(10))
+						hat.forceMove(get_turf(src))
+						hat.throw_at_random(FALSE, 3, 2)
+						visible_message(span_danger("[hat] goes flying off [src]'s head!"))
+						hat = null
+						update_icon()
 					return
 				if(I_GRAB)
 					if(is_vore_predator(H) && H.devourable && src.feeding && src.devourable)
@@ -1080,6 +1093,12 @@
 		var/open_overlay = sprite_datum.get_open_sprite(src)
 		if(open_overlay)
 			add_overlay(open_overlay)
+
+	if(hat)
+		hat_overlay = hat.make_worn_icon(SPECIES_HUMAN, slot_head_str, default_icon = 'icons/inventory/head/mob.dmi', default_layer = 0)
+		update_worn_icons()
+	else if(hat_overlay)
+		QDEL_NULL(hat_overlay)
 
 /mob/living/silicon/robot/proc/installed_modules()
 	robotact.tgui_interact(src)
@@ -1632,3 +1651,46 @@
 	if(emagged)
 		return "syndicate"
 	return ui_theme
+
+/mob/living/silicon/robot/proc/place_on_head(obj/item/new_hat)
+	if(hat)
+		hat.forceMove(get_turf(src))
+	hat = new_hat
+	new_hat.forceMove(src)
+	update_icon()
+
+/mob/living/silicon/robot/proc/update_worn_icons()
+	if(!hat_overlay)
+		return
+	cut_overlay(hat_overlay)
+
+	var/list/offset_list = resting ? sprite_datum.hat_offsets[SPRITE_HAT_OFFSET] : sprite_datum.hat_offsets[SPRITE_HAT_REST_OFFSET]
+	if(islist(offset_list))
+		var/list/offset = offset_list[isDiagonal(dir) ? dir2text(dir & (WEST|EAST)) : dir2text(dir)]
+		if(offset)
+			hat_overlay.pixel_w = offset[1]
+			hat_overlay.pixel_z = offset[2]
+
+	add_overlay(hat_overlay)
+
+/mob/living/silicon/robot/set_dir(newdir)
+	var/old_dir = dir
+	. = ..()
+	if(. != old_dir)
+		update_worn_icons()
+
+/mob/living/silicon/robot/attack_robot(mob/user)
+	. = ..()
+
+	if(user != src || isnull(hat))
+		return
+
+	balloon_alert(user, "dropping hat...")
+	if(!do_after(user, 3 SECONDS, src))
+		return
+	if(QDELETED(src) || !Adjacent(user) || user.incapacitated || isnull(hat))
+		return
+	hat.forceMove(get_turf(src))
+	hat = null
+	update_icon()
+	balloon_alert(user, "dropped hat")

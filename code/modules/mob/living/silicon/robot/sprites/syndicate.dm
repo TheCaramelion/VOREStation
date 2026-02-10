@@ -23,6 +23,7 @@
 	name = "Drake"
 	sprite_icon_state = "drake"
 	has_vore_belly_resting_sprites = TRUE
+	hat_offsets = list(DRAKE_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/syndie/smolraptor
 	sprite_icon = 'icons/mob/robot/smallraptors/smolraptor_syndie.dmi'
@@ -32,6 +33,7 @@
 	has_vore_belly_sprites = TRUE
 	has_dead_sprite_overlay = FALSE
 	rest_sprite_options = list("Default", "Sit", "Bellyup")
+	hat_offsets = list(SMOL_RAPTOR_HAT_OFFSET)
 
 // Tall sprites
 
@@ -90,6 +92,7 @@
 	sprite_decals = list("breastplate","loincloth","eyecover")
 	icon_x = 32
 	pixel_x = 0
+	hat_offsets = list(DULLAHAN_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/tall/syndie/dullahanv3syndi
 	sprite_icon = 'icons/mob/robot/dullahan/v3/syndi.dmi'
@@ -100,6 +103,7 @@
 	has_vore_belly_sprites = TRUE
 	sprite_decals = list("decals")
 	rest_sprite_options = list("Default", "Sit")
+	hat_offsets = list(DULLAHAN_HAT_OFFSET)
 
 
 // Protector
@@ -199,6 +203,7 @@
 	has_vore_belly_sprites = TRUE
 	sprite_decals = list("decals")
 	rest_sprite_options = list("Default", "Sit")
+	hat_offsets = list(DULLAHAN_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/tall/mechanist/syndimechraptor
 	name = "Raptor V-4"
@@ -245,6 +250,7 @@
 	sprite_icon_state = "vale"
 	has_eye_light_sprites = TRUE
 	has_sleeper_light_indicator = TRUE
+	hat_offsets = list(VALE_HAT_OFFSET)
 
 // Tall sprites
 
@@ -284,6 +290,7 @@
 	rest_sprite_options = list("Default", "Sit")
 	pixel_x = -16
 	icon_x = 64
+	hat_offsets = list(DULLAHAN_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/tall/ninja/mekaninja
 	name = "Meka"
@@ -325,3 +332,4 @@
 	rest_sprite_options = list("Default")
 	icon_x = 64
 	pixel_x = -16
+	hat_offsets = list(DULLAHAN_TAUR_HAT_OFFSET)

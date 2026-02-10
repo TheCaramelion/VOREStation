@@ -145,6 +145,7 @@
 	sprite_hud_icon_state = "k9"
 	has_eye_light_sprites = TRUE
 	sprite_flags = ROBOT_HAS_TASER_SPRITE | ROBOT_HAS_LASER_SPRITE
+	hat_offsets = list(VALE_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/security/borgi
 	name = "Borgi"
@@ -166,6 +167,7 @@
 	sprite_icon_state = "drake"
 	has_vore_belly_resting_sprites = TRUE
 	sprite_flags = ROBOT_HAS_TASER_SPRITE | ROBOT_HAS_LASER_SPRITE
+	hat_offsets = list(DRAKE_HAT_OFFSET)
 
 // Tall sprites
 
@@ -179,6 +181,7 @@
 	has_custom_equipment_sprites = TRUE
 	sprite_flags = ROBOT_HAS_TASER_SPRITE | ROBOT_HAS_LASER_SPRITE
 	rest_sprite_options = list("Default", "Bellyup")
+	hat_offsets = list(RAPTOR_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/tall/security/meka
 	name = "MEKA"
@@ -232,6 +235,7 @@
 	rest_sprite_options = list("Default", "Sit")
 	icon_x = 32
 	pixel_x = 0
+	hat_offsets = list(DULLAHAN_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/tall/security/dullataur
 	name = "Dullataur"
@@ -247,6 +251,7 @@
 	sprite_decals = list("breastplate")
 	icon_x = 64
 	pixel_x = -16
+	hat_offsets = list(DULLAHAN_TAUR_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/tall/security/dullahanv3
 	name = "Dullahan security v3"
@@ -259,6 +264,7 @@
 	rest_sprite_options = list("Default", "Sit")
 	icon_x = 64
 	pixel_x = -16
+	hat_offsets = list(DULLAHAN_HAT_OFFSET)
 
 
 /datum/robot_sprite/dogborg/security/vale2
@@ -268,6 +274,7 @@
 	sprite_hud_icon_state = "k9"
 	has_eye_light_sprites = TRUE
 	rest_sprite_options = list("Default")
+	hat_offsets = list(VALE_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/security/cat
 	name = "Cat"
@@ -285,6 +292,7 @@
 	has_vore_belly_sprites = TRUE
 	has_dead_sprite_overlay = FALSE
 	rest_sprite_options = list("Default", "Sit", "Bellyup")
+	hat_offsets = list(SMOL_RAPTOR_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/security/smolraptor/alt
 	name = "Small Raptor Alt"
