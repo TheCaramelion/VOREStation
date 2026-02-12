@@ -132,7 +132,7 @@
 	has_vore_belly_sprites = TRUE
 	has_dead_sprite_overlay = FALSE
 	rest_sprite_options = list("Default", "Sit", "Bellyup")
-	hat_offsets = list(SMOL_RAPTOR_HAT_OFFSET)
+	hat_offset = list(SMOL_RAPTOR_HAT_OFFSET)
 
 // Tall sprites
 /*
@@ -161,7 +161,7 @@
 	sprite_decals = list("breastplate")
 	icon_x = 64
 	pixel_x = -16
-	hat_offsets = list(DULLAHAN_TAUR_HAT_OFFSET)
+	hat_offset = list(DULLAHAN_TAUR_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/tall/standard/dullahanv3/standarddully
 	name = "Dullahan standard v3"
@@ -170,7 +170,7 @@
 	has_vore_belly_sprites = TRUE
 	sprite_decals = list("decals")
 	rest_sprite_options = list("Default", "sit")
-	hat_offsets = list(DULLAHAN_HAT_OFFSET)
+	hat_offset = list(DULLAHAN_HAT_OFFSET)
 
 
 /* //This used to be Widerobot_Standard_ch.dm. It was unticked, so it shall be put here instead.

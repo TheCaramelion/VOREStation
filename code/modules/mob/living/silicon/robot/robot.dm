@@ -43,7 +43,6 @@
 
 	var/mutable_appearance/hat_overlay
 	var/obj/item/clothing/head/hat // THE hat!
-	var/hat_offset = list("north" = list(0, -3), "south" = list(0, -3), "east" = list(4, -3), "west" = list(-4, -3))
 
 //Hud stuff
 

@@ -192,20 +192,20 @@
 	sprite_icon_state = "vale"
 	has_eye_light_sprites = TRUE
 	has_vore_belly_sprites = TRUE
-	hat_offsets = list(VALE_HAT_OFFSET)
+	hat_offset = list(VALE_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/service/valedark
 	name = "Hound V2 Darkmode"
 	sprite_icon_state = "valedark"
 	has_eye_light_sprites = TRUE
 	has_vore_belly_sprites = TRUE
-	hat_offsets = list(VALE_HAT_OFFSET)
+	hat_offset = list(VALE_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/service/drake
 	name = "Drake"
 	sprite_icon_state = "drake"
 	has_vore_belly_resting_sprites = TRUE
-	hat_offsets = list(DRAKE_HAT_OFFSET)
+	hat_offset = list(DRAKE_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/service/booze
 	name = "Boozehound"
@@ -265,7 +265,7 @@
 	sprite_icon_state = "raptor"
 	has_custom_equipment_sprites = TRUE
 	rest_sprite_options = list("Default", "Bellyup")
-	hat_offsets = list(RAPTOR_HAT_OFFSET)
+	hat_offset = list(RAPTOR_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/tall/service/fancyraptor
 	name = "Raptor V-4000"
@@ -273,7 +273,7 @@
 	has_custom_equipment_sprites = TRUE
 	rest_sprite_options = list("Default", "Bellyup")
 	// These already had a hat. Their hat gets a hat.
-	hat_offsets = list(
+	hat_offset = list(
 	SPRITE_HAT_OFFSET = list("north" = list(16, 14), "south" = list(16, 14), "east" = list(30, 14), "west" = list(2, 14)),
 	SPRITE_HAT_REST_OFFSET = list("north" = list(16, 18), "south" = list(16, 18), "east" = list(30, 18), "west" = list(2, 18))
 	)
@@ -337,7 +337,7 @@
 	sprite_decals = list("breastplate", "loincloth","loinclothbreastplate","eyecover")
 	pixel_x = 0
 	icon_x = 32
-	hat_offsets = list(DULLAHAN_HAT_OFFSET)
+	hat_offset = list(DULLAHAN_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/tall/service/dullataur
 	name = "Dullataur"
@@ -353,7 +353,7 @@
 	sprite_decals = list("breastplate")
 	icon_x = 64
 	pixel_x = -16
-	hat_offsets = list(DULLAHAN_TAUR_HAT_OFFSET)
+	hat_offset = list(DULLAHAN_TAUR_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/tall/service/dullahanv3
 	name = "Dullahan v3"
@@ -366,7 +366,7 @@
 	rest_sprite_options = list("Default", "Sit")
 	icon_x = 64
 	pixel_x = -16
-	hat_offsets = list(DULLAHAN_HAT_OFFSET)
+	hat_offset = list(DULLAHAN_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/tall/service/dullahanv3/servicealt3
 	name = "Dullahan v3 matcha"
@@ -437,7 +437,7 @@
 	name = "Hound V2"
 	sprite_icon_state = "vale"
 	has_eye_light_sprites = TRUE
-	hat_offsets = list(VALE_HAT_OFFSET)
+	hat_offset = list(VALE_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/clerical/otie
 	name = "Otieborg"
@@ -461,7 +461,7 @@
 	name = "Honkhound V2"
 	sprite_icon_state = "honkborg"
 	has_eye_light_sprites = TRUE
-	hat_offsets = list(VALE_HAT_OFFSET)
+	hat_offset = list(VALE_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/tall/clown
 	module_type = "Clown"
@@ -487,7 +487,7 @@
 	rest_sprite_options = list("Default", "Sit")
 	pixel_x = 0
 	icon_x = 32
-	hat_offsets = list(DULLAHAN_HAT_OFFSET)
+	hat_offset = list(DULLAHAN_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/clown/stoat
 	name = "ST-04t"
@@ -504,7 +504,7 @@
 	sprite_icon_state = "servborg"
 	rest_sprite_options = list("Default")
 	has_eye_light_sprites = TRUE
-	hat_offsets = list(VALE_HAT_OFFSET)
+	hat_offset = list(VALE_HAT_OFFSET)
 
 /datum/robot_sprite/dogborg/service/cat
 	name = "Cat"
@@ -531,4 +531,4 @@
 	has_vore_belly_sprites = TRUE
 	has_dead_sprite_overlay = FALSE
 	rest_sprite_options = list("Default", "Sit", "Bellyup")
-	hat_offsets = list(SMOL_RAPTOR_HAT_OFFSET)
+	hat_offset = list(SMOL_RAPTOR_HAT_OFFSET)
