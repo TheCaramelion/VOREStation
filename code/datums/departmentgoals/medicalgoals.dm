@@ -29,3 +29,29 @@
 	if(target.dna.real_name in scanned_mobs)
 		return
 	scanned_mobs += target.dna.real_name
+
+// Cure Advanced Diseases
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/datum/goal/medical/virology
+	name = "Cure Diseases"
+	var/list/cured_diseases = list()
+
+/datum/goal/medical/virology/New()
+	. = ..()
+	goal_count = rand(10, 20)
+	goal_text = "Ensure the galaxy doesn't suffer from a variety of advanced diseases, obtain the cure for [goal_count] of them."
+	RegisterSignal(SSdcs, COMSIG_GLOB_ADV_DISEASE_CURED, PROC_REF(handle_disease_cure))
+
+/datum/goal/medical/virology/Destroy(force)
+	UnregisterSignal(SSdcs, COMSIG_GLOB_ADV_DISEASE_CURED)
+	. = ..()
+
+/datum/goal/medical/virology/check_completion()
+	current_count = cured_diseases.len
+	. = ..()
+
+/datum/goal/medical/virology/proc/handle_disease_cure(atom/source, id)
+	SIGNAL_HANDLER
+	if(id in cured_diseases)
+		return
+	cured_diseases += id
