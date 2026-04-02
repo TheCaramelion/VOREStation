@@ -69,7 +69,7 @@
 /datum/goal/research/harvest_anomalies/New()
 	. = ..()
 	goal_count = rand(1500, 3000)
-	goal_text = "Harvest anomalous points from anomalies, produce [goal_count] from any kind of anomaly."
+	goal_text = "Harvest points from anomalies, produce [goal_count] from any kind of anomaly."
 	RegisterSignal(SSdcs, COMSIG_GLOB_ANOMALY_HARVESTED, PROC_REF(handle_anomaly_harvest))
 
 /datum/goal/research/harvest_anomalies/Destroy(force)

@@ -163,3 +163,7 @@
 
 // base /obj/machinery/anomaly_harvester/proc/add_points() : (add_points)
 #define COMSIG_GLOB_ANOMALY_HARVESTED "!anomaly_harvested"
+// base /obj/item/mail_scanner/afterattack()
+#define COMSIG_GLOB_MAIL_DELIVERED "!mail_delivered"
+// base /obj/machinery/computer/arcade/proc/pricevend()
+#define COMSIG_GLOB_ARCADE_PRIZEVEND "!arcade_win"

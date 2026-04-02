@@ -116,3 +116,22 @@
 /datum/goal/cargo/mine_rock/check_completion()
 	current_count = GLOB.rocks_drilled_roundstat
 	. = ..()
+
+// Deliver Mail
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/datum/goal/cargo/deliver_mail
+	name = "Deliver Mail"
+
+/datum/goal/cargo/deliver_mail/New()
+	. = ..()
+	goal_count = rand(40, 70)
+	goal_text = "Nothing stops the mail. Deliver [goal_count] envelopes to their corresponding employer."
+	RegisterSignal(SSdcs, COMSIG_GLOB_MAIL_DELIVERED, PROC_REF(handle_mail_delivery))
+
+/datum/goal/cargo/deliver_mail/Destroy(force)
+	UnregisterSignal(SSdcs, COMSIG_GLOB_MAIL_DELIVERED)
+	. = ..()
+
+/datum/goal/cargo/deliver_mail/proc/handle_mail_delivery(atom/source)
+	SIGNAL_HANDLER
+	current_count++

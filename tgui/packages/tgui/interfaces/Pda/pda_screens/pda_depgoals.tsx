@@ -60,7 +60,10 @@ const GoalsDisplay = (props) => {
                   }}
                 >
                   <Stack align="baseline">
-                    {!!goal.name && <Stack.Item grow>{goal.count}%</Stack.Item>}
+                    {(goal.count < 100 && (
+                      <Stack.Item grow>{goal.count}%</Stack.Item>
+                    )) ||
+                      'Goal Completed'}
                   </Stack>
                 </ProgressBar>
               </Stack.Item>
