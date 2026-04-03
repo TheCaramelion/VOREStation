@@ -167,3 +167,5 @@
 #define COMSIG_GLOB_MAIL_DELIVERED "!mail_delivered"
 // base /obj/machinery/computer/arcade/proc/pricevend()
 #define COMSIG_GLOB_ARCADE_PRIZEVEND "!arcade_win"
+
+#define COMSIG_GLOB_DONATE_BLOOD "!donate_blood"

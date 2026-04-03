@@ -55,3 +55,22 @@
 	if(id in cured_diseases)
 		return
 	cured_diseases += id
+
+// Donate Blood
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/datum/goal/medical/blood
+	name = "Donate Blood"
+
+/datum/goal/medical/blood/New()
+	. = ..()
+	goal_count = rand(700, 1200)
+	goal_text = "Make sure Medical stays well stocked, donate [goal_count] units of blood."
+	RegisterSignal(SSdcs, COMSIG_GLOB_DONATE_BLOOD, PROC_REF(handle_donate_blood))
+
+/datum/goal/medical/blood/Destroy(force)
+	UnregisterSignal(SSdcs, COMSIG_GLOB_DONATE_BLOOD)
+	. = ..()
+
+/datum/goal/medical/blood/proc/handle_donate_blood(atom/source, blood_count)
+	SIGNAL_HANDLER
+	current_count += blood_count
