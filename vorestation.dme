@@ -712,6 +712,7 @@
 #include "code\datums\components\infective.dm"
 #include "code\datums\components\orbiter.dm"
 #include "code\datums\components\overlay_lighting.dm"
+#include "code\datums\components\pinata.dm"
 #include "code\datums\components\radiation_countdown.dm"
 #include "code\datums\components\radioactive_exposure.dm"
 #include "code\datums\components\reactive_icon_update.dm"

@@ -6,3 +6,19 @@
 	var/dist = sqrt(dx ** 2 + dy ** 2)
 
 	return dist
+
+/proc/get_adjacent_turfs(atom/center)
+	var/list/hand_back = list()
+	var/turf/simulated/floor/new_turf = get_step(center, NORTH)
+	if(istype(new_turf))
+		hand_back += new_turf
+	new_turf = get_step(center, SOUTH)
+	if(istype(new_turf))
+		hand_back += new_turf
+	new_turf = get_step(center, EAST)
+	if(istype(new_turf))
+		hand_back += new_turf
+	new_turf = get_step(center, WEST)
+	if(istype(new_turf))
+		hand_back += new_turf
+	return hand_back
