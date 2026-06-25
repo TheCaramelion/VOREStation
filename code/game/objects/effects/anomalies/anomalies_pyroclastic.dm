@@ -50,3 +50,32 @@
 			burst(20, 900, 600)
 		else
 			burst(30, 110, 800)
+
+/obj/effect/anomaly/pyro/big
+	immortal = TRUE
+	anomaly_core = null
+	releasedelay = 2
+
+/obj/effect/anomaly/pyro/big/Initialize(mapload, new_lifespan, drops_core)
+	. = ..()
+
+	transform *= 3
+
+/obj/effect/anomaly/pyro/big/Bumped(atom/movable/bumpee)
+	. = ..()
+
+	if(isliving(bumpee))
+		var/mob/living/living = bumpee
+		living.dust()
+
+/obj/effect/anomaly/pyro/big/anomalyEffect(seconds_per_tick)
+	. = ..()
+
+	if(!.)
+		return
+
+	var/turf/turf = get_turf(src)
+	if(isopenspace(turf))
+		return
+
+	turf.ChangeTurf(/turf/simulated/floor/lava)

@@ -82,3 +82,28 @@
 /obj/effect/anomaly/flux/proc/highSevPulse(power, explosive, current_jumps)
 	tesla_zap(src, 4, 1250, FALSE, FALSE, current_jumps = 1)
 	addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(tesla_zap), src, 4, 1500, FALSE, FALSE), 3 SECONDS)
+
+/obj/effect/anomaly/flux/big
+	immortal = TRUE
+	anomaly_core = null
+	shockdamage = 30
+
+	var/zap_range = 1
+	var/zap_power = 2500
+
+/obj/effect/anomaly/flux/big/Initialize(mapload, new_lifespan, drops_core, emp_zap)
+	. = ..()
+
+	transform *= 3
+
+/obj/effect/anomaly/flux/big/anomalyEffect()
+	. = ..()
+
+	tesla_zap(src, zap_range, zap_power, FALSE, FALSE, current_jumps = 2)
+
+/obj/effect/anomaly/flux/big/Bumped(atom/movable/bumpee)
+	. = ..()
+
+	if(isliving(bumpee))
+		var/mob/living/living = bumpee
+		living.dust()
