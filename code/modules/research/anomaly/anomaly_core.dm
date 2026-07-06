@@ -244,3 +244,45 @@
 	anomaly_type = /obj/effect/anomaly/ectoplasm
 	activation_cooldown = 60 SECONDS
 */
+
+/obj/item/assembly/signaler/anomaly/soap
+	name = "\improper soap anomaly core"
+	desc = "The neutralized core of a soap anomaly. Smells like lavender."
+	icon_state = "weather_core"
+	anomaly_type = /obj/effect/anomaly/soap
+
+/obj/item/assembly/signaler/anomaly/soap/Crossed(atom/movable/AM as mob|obj)
+	if(AM.is_incorporeal())
+		return
+	if(isliving(AM))
+		var/mob/living/M = AM
+		M.slip("\the [src.name]", 3)
+
+/obj/item/assembly/signaler/anomaly/soap/afterattack(atom/target, mob/user, proximity_flag, click_parameters)
+	. = ..()
+	if(ishuman(target) && user.zone_sel.selecting == O_MOUTH)
+		user.visible_message(span_danger("\The [user] washes \the [target]'s mouth out with \the [src]!"))
+		user.setClickCooldown(DEFAULT_QUICK_COOLDOWN)
+		return
+	if(!proximity)
+		return
+	if(user.client && (target in user.client.screen))
+		to_chat(user, span_warning("You need to take that [target] off before cleaning it."))
+	else if(istype(target,/obj/effect/decal/cleanable))
+		user.visible_message("[user] begins to scrub \the [target] out with [src].", span_warning("You begin to scrub \the [target] out with [src]..."))
+		if(do_after(user, 5, target = target))
+			user.balloon_alert(user, "you scrub \the [target] out.")
+			qdel(target)
+	else
+		if(istype(target,/turf))
+			user.visible_message("[user] begins to scrub \the [target] out with [src].", span_warning("You begin to scrub \the [target] out with [src]..."))
+			if(do_after(user, 5, target = target))
+				user.balloon_alert(user, "you scrub \the [target] clean.")
+				var/turf/T = target
+				T.wash(CLEAN_SCRUB)
+				reagents.trans_to_turf(T, 1, 10)
+			return
+		user.visible_message("[user] begins to clean \the [target.name] with [src]...", span_notice("You begin to clean \the [target.name] with [src]..."))
+		if(do_after(user, 5, target = target))
+			target.wash(CLEAN_SCRUB)
+	return
