@@ -14,6 +14,7 @@
 // Vendors and smartfridges
 #define WIRE_THROW_ITEM "Item Throw"
 #define WIRE_CONTRABAND "Contraband"
+#define WIRE_ROGUE "Rogue"
 
 // Airlock
 #define WIRE_DOOR_BOLTS "Door Bolts"

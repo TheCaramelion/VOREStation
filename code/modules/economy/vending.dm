@@ -72,6 +72,11 @@
 	var/shoot_inventory = 0 //Fire items at customers! We're broken!
 	var/shoot_inventory_chance = 1
 
+	var/killing_machine = FALSE // Chase people! Roll over on them! We're a killing machine!!
+	var/datum/weakref/target_victim // We hate you and we will find you!!
+	var/forced_target = FALSE // Admin stuff - Makes the vending machine lock the heck in
+	var/kill_chance = 10
+
 	var/scan_id = 1
 	var/obj/item/coin/coin
 
@@ -562,6 +567,15 @@ GLOBAL_LIST_EMPTY(vending_products)
 		flick("[icon_state]-deny",src)
 		playsound(src, 'sound/machines/deniedbeep.ogg', 50, 0)
 		return FALSE
+	if(killing_machine)
+		speak(pick(
+			"Once in a life time offer, and you [pick("blew it", "missed it", "screwed it up")]!",
+			"The deals are off!",
+			"We don't accept card, only accept flesh and blood!",
+			"You had your chance!"))
+		flick("[icon_state]-deny",src)
+		playsound(src, 'sound/machines/deniedbeep.ogg', 50, FALSE)
+		return FALSE
 	if(R.amount < 1)
 		return FALSE
 	return TRUE
@@ -701,17 +715,15 @@ GLOBAL_LIST_EMPTY(vending_products)
 	if(shoot_inventory && prob(shoot_inventory_chance))
 		throw_item()
 
+	if(killing_machine && prob(kill_chance))
+		seek_n_destroy()
+
 	return
 
 /obj/machinery/vending/proc/speak(message)
 	if(stat & NOPOWER)
 		return
-
-	if(!message)
-		return
-
-	for(var/mob/O in hearers(src, null))
-		O.show_message(span_npc_say(span_name("\The [src]") + " beeps, \"[message]\""),2)
+	atom_say(message)
 	return
 
 /obj/machinery/vending/power_change()
@@ -780,5 +792,71 @@ GLOBAL_LIST_EMPTY(vending_products)
 			return FALSE
 		throw_item.vendor_action(src)
 		playsound(src, vending_sound, 50, TRUE)
+
+/obj/machinery/vending/proc/toggle_killing()
+	killing_machine = !killing_machine
+	if(killing_machine)
+		tiltable = FALSE // We're too angry!!
+		squish_damage = 15 // Lowers the damage a little, try to not kill too fast
+	else
+		tiltable = TRUE
+		squish_damage = initial(squish_damage)
+
+/obj/machinery/vending/proc/seek_n_destroy()
+	var/mob/living/target = target_victim?.resolve()
+	if(QDELETED(target))
+		target_victim = null
+	if(!Adjacent(target))
+		var/turf/crush_turf = get_step(src, get_dir(src, target))
+		if(iswall(crush_turf))
+			return
+		tilt(crush_turf)
+	tilt(target)
+	if(!isnull(target_victim) && prob(80))
+		return
+	if(forced_target)
+		return
+	var/mob/living/new_target = seek()
+	if(isnull(new_target))
+		target_victim = null
+		return
+	if(new_target == target)
+		return
+	if(isbelly(new_target.loc) || istype(new_target.loc, /area/crew_quarters))
+		return
+	target = new_target
+	target_victim = WEAKREF(new_target)
+	return TRUE
+
+/obj/machinery/vending/proc/seek()
+	var/closest_distance = INFINITY
+	var/mob/living/carbon/closest_target = null
+	for(var/mob/living/carbon/target in GLOB.player_list)
+		if(target.z != z)
+			continue
+		if(SEND_SIGNAL(target, COMSIG_CHECK_FOR_GODMODE) & COMSIG_GODMODE_CANCEL)
+			continue
+		if(target.is_incorporeal())
+			continue
+		if(target.stat >= UNCONSCIOUS)
+			continue
+		var/area/target_area = get_area(target)
+		if(target_area.flag_check(AREA_FORBID_EVENTS))
+			continue
+		var/distance_from_target = get_dist(src, target)
+		if(distance_from_target >= closest_distance)
+			continue
+		closest_distance = distance_from_target
+		closest_target = target
+
+	return closest_target
+
+/obj/machinery/vending/proc/grant_target(mob/living/target)
+	if(!killing_machine)
+		toggle_killing()
+	if(isnull(target))
+		return
+	target_victim = WEAKREF(target)
+	return TRUE
 
 //Actual machines are in vending_machines.dm

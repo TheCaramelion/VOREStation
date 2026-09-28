@@ -1,10 +1,10 @@
 /datum/wires/vending
 	holder_type = /obj/machinery/vending
-	wire_count = 4
+	wire_count = 5
 	proper_name = "Vending machine"
 
 /datum/wires/vending/New(atom/_holder)
-	wires = list(WIRE_THROW_ITEM, WIRE_IDSCAN, WIRE_ELECTRIFY, WIRE_CONTRABAND)
+	wires = list(WIRE_THROW_ITEM, WIRE_IDSCAN, WIRE_ELECTRIFY, WIRE_CONTRABAND, WIRE_ROGUE)
 	return ..()
 
 /datum/wires/vending/interactable(mob/user)
@@ -22,6 +22,7 @@
 	. += "The red light is [V.shoot_inventory ? "off" : "blinking"]."
 	. += "The green light is [(V.categories & CAT_HIDDEN) ? "on" : "off"]."
 	. += "A [V.scan_id ? "purple" : "yellow"] light is on."
+	. += "The blue light is [V.killing_machine ? "off" : "blinking"]."
 
 /datum/wires/vending/on_pulse(wire)
 	var/obj/machinery/vending/V = holder
@@ -34,6 +35,8 @@
 			V.seconds_electrified = 30
 		if(WIRE_IDSCAN)
 			V.scan_id = !V.scan_id
+		if(WIRE_ROGUE)
+			V.killing_machine = V.toggle_killing()
 	..()
 
 /datum/wires/vending/on_cut(wire, mend)
@@ -50,4 +53,7 @@
 				V.seconds_electrified = -1
 		if(WIRE_IDSCAN)
 			V.scan_id = 1
+		if(WIRE_ROGUE)
+			V.killing_machine = !mend
+			V.tiltable = TRUE
 	..()

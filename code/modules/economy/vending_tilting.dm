@@ -47,6 +47,9 @@
 			if(isarea(atom_target))
 				continue
 
+			if(src == atom_target) // Stop crushing yourself
+				continue
+
 			if(SEND_SIGNAL(atom_target, COMSIG_PRE_TILT_AND_CRUSH, src) & COMPONENT_IMMUNE_TO_TILT_AND_CRUSH)
 				continue
 
