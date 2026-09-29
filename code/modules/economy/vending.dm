@@ -76,6 +76,7 @@
 	var/datum/weakref/target_victim // We hate you and we will find you!!
 	var/forced_target = FALSE // Admin stuff - Makes the vending machine lock the heck in
 	var/kill_chance = 10
+	var/list/kill_path = null
 
 	var/scan_id = 1
 	var/obj/item/coin/coin
@@ -806,12 +807,15 @@ GLOBAL_LIST_EMPTY(vending_products)
 	var/mob/living/target = target_victim?.resolve()
 	if(QDELETED(target))
 		target_victim = null
+	LAZYINITLIST(kill_path)
 	if(!Adjacent(target))
-		var/turf/crush_turf = get_step(src, get_dir(src, target))
-		if(iswall(crush_turf))
-			return
-		tilt(crush_turf)
-	tilt(target)
+		kill_path = AStar(get_turf(loc), get_step(get_turf(target), target.dir), /turf/proc/AdjacentTurfsWithAccess, /turf/proc/Distance, 0, 25)
+		if(kill_path.len > 1)
+			var/turf/next = kill_path[2]
+			var/desired_dir = get_dir(loc, next)
+			forceMove(next, desired_dir)
+	else
+		tilt(target)
 	if(!isnull(target_victim) && prob(80))
 		return
 	if(forced_target)
