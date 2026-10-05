@@ -91,3 +91,14 @@
 	else
 		var/time_left = max(0, (A.death_time - world.time)/10)
 		return round(time_left)
+
+/obj/effect/countdown/tornado
+	name = "tornado countdown"
+
+/obj/effect/countdown/tornado/get_value()
+	var/obj/effect/tornado/spin = attached_to
+	if(!istype(spin))
+		return
+
+	var/time_left = max(0, (spin.death_time - world.time)/10)
+	return round(time_left)
